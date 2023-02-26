@@ -11,8 +11,8 @@ import (
 )
 
 const (
-	screenWidth  = 1000
-	screenHeight = 1000
+	screenWidth  = 999
+	screenHeight = 999
 )
 
 type Game struct {

@@ -92,16 +92,13 @@ func (g *game) Update() error {
 	return nil
 }
 func (g *game) Draw(screen *ebiten.Image) {
-	for i := 0; i < 24; i += 4 {
-		tmp1 := point{
-			g.p[g.planes[i][1]].x - g.p[g.planes[i][0]].x,
-			g.p[g.planes[i][1]].y - g.p[g.planes[i][0]].y,
-			g.p[g.planes[i][1]].z - g.p[g.planes[i][0]].z}
-		tmp2 := point{
-			g.p[g.planes[i+1][1]].x - g.p[g.planes[i+1][0]].x,
-			g.p[g.planes[i+1][1]].y - g.p[g.planes[i+1][0]].y,
-			g.p[g.planes[i+1][1]].z - g.p[g.planes[i+1][0]].z}
-		if !IsFacingScreen(tmp1, tmp2) {
+	// visiblePlanes := make([]int, 0)
+
+	// Check each plane if it's facing the screen, and if it is, add its index to the slice
+	for i := 0; i < len(g.planes); i += 4 {
+		a := g.p[g.planes[i][0]]
+		b := g.p[g.planes[i][1]]
+		if IsFacingScreen(a, b) {
 			for i1 := i; i1 < i+4; i1++ {
 				ebitenutil.DrawLine(screen,
 					(g.p[g.planes[i1][0]].x/(g.p[g.planes[i1][0]].z+1000))*900+float64(screenWidth/2),
@@ -112,6 +109,37 @@ func (g *game) Draw(screen *ebiten.Image) {
 			}
 		}
 	}
+
+	// Draw only the visible planes
+	// for _, i := range visiblePlanes {
+	// 	a := g.p[g.planes[i][0]]
+	// 	b := g.p[g.planes[i][1]]
+	// 	ebitenutil.DrawLine(screen,
+	// 		a.x/(a.z+1000)*900+screenWidth/2,
+	// 		a.y/(a.z+1000)*900+screenHeight/2,
+	// 		b.x/(b.z+1000)*900+screenWidth/2,
+	// 		b.y/(b.z+1000)*900+screenHeight/2, c)
+	// }
+	// for i := 0; i < 24; i += 4 {
+	// 	tmp1 := point{
+	// 		g.p[g.planes[i][0]].x,
+	// 		g.p[g.planes[i][0]].y,
+	// 		g.p[g.planes[i][0]].z}
+	// 	tmp2 := point{
+	// 		g.p[g.planes[i][1]].x,
+	// 		g.p[g.planes[i][1]].y,
+	// 		g.p[g.planes[i][1]].z}
+	// 	if IsFacingScreen(tmp1, tmp2) {
+	// 		for i1 := i; i1 < i+4; i1++ {
+	// 			ebitenutil.DrawLine(screen,
+	// 				(g.p[g.planes[i1][0]].x/(g.p[g.planes[i1][0]].z+1000))*900+float64(screenWidth/2),
+	// 				(g.p[g.planes[i1][0]].y/(g.p[g.planes[i1][0]].z+1000))*900+float64(screenHeight/2),
+	// 				(g.p[g.planes[i1][1]].x/(g.p[g.planes[i1][1]].z+1000))*900+float64(screenWidth/2),
+	// 				(g.p[g.planes[i1][1]].y/(g.p[g.planes[i1][1]].z+1000))*900+float64(screenHeight/2),
+	// 				color.White)
+	// 		}
+	// 	}
+	// }
 }
 
 func main() {
