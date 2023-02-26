@@ -1,7 +1,6 @@
 package main
 
 import (
-	"fmt"
 	"image/color"
 	"log"
 	"math"
@@ -49,11 +48,22 @@ func (v *Vec) Rotate(rad Rotator) {
 	v.Z = v.X*math.Sin(rad.Y) + v.Z*math.Cos(rad.Y)
 
 	// Rotation around X
-	v.Y = v.Y*math.Cos(rad.X) + v.Z*math.Sin(rad.X)
+	v.Y = v.Y*math.Cos(rad.X) - v.Z*math.Sin(rad.X)
 	v.Z = -v.Y*math.Sin(rad.X) + v.Z*math.Cos(rad.X)
 }
 
-func DrawLine(screen *ebiten.Image, a, b Vec) {
+func CentralProjection(v Vec, k float64) Vec {
+	return Vec{
+		-(v.X / v.Z) * k,
+		-(v.Y / v.Z) * k,
+		-k,
+	}
+}
+
+func DrawLine(screen *ebiten.Image, a, b Vec, clr color.Color) {
+	k := float64(-250)
+	a = CentralProjection(a, k)
+	b = CentralProjection(b, k)
 	ebitenutil.DrawLine(screen, a.X, a.Y, b.X, b.Y, color.RGBA{255, 102, 204, 255})
 }
 
@@ -61,23 +71,19 @@ type Rect struct {
 	A, B, C, D Vec
 }
 
-func (r *Rect) Draw(screen *ebiten.Image) {
-	DrawLine(screen, r.A, r.B)
-	DrawLine(screen, r.B, r.C)
-	DrawLine(screen, r.C, r.D)
-	DrawLine(screen, r.D, r.A)
+func (r *Rect) Draw(screen *ebiten.Image, clr color.Color) {
+	DrawLine(screen, r.A, r.B, clr)
+	DrawLine(screen, r.B, r.C, clr)
+	DrawLine(screen, r.C, r.D, clr)
+	DrawLine(screen, r.D, r.A, clr)
 }
 
 type Cube struct {
 	p [8]Vec
 }
 
-var X, Y = screenWidth - 500, 0
-
 func (c *Cube) Rotate(screen *ebiten.Image, r Rotator) {
 	ctr := Add(Divide(Sub(c.p[6], c.p[0]), 2), c.p[0])
-	ebitenutil.DebugPrintAt(screen, fmt.Sprintf("%v, %v, %v", ctr.X, ctr.Y, ctr.Z), X, Y)
-	Y += 20
 	for i := range c.p {
 		c.p[i] = Sub(c.p[i], ctr)
 		c.p[i].Rotate(r)
@@ -87,44 +93,59 @@ func (c *Cube) Rotate(screen *ebiten.Image, r Rotator) {
 
 func (r *Cube) Draw(screen *ebiten.Image, clr color.Color) {
 	// Drawing near plane
-	ebitenutil.DrawLine(screen, r.p[0].X, r.p[0].Y, r.p[1].X, r.p[1].Y, clr)
-	ebitenutil.DrawLine(screen, r.p[1].X, r.p[1].Y, r.p[2].X, r.p[2].Y, clr)
-	ebitenutil.DrawLine(screen, r.p[2].X, r.p[2].Y, r.p[3].X, r.p[3].Y, clr)
-	ebitenutil.DrawLine(screen, r.p[3].X, r.p[3].Y, r.p[0].X, r.p[0].Y, clr)
+	DrawLine(screen, r.p[0], r.p[1], clr)
+	DrawLine(screen, r.p[1], r.p[2], clr)
+	DrawLine(screen, r.p[2], r.p[3], clr)
+	DrawLine(screen, r.p[3], r.p[0], clr)
 
 	// Drawing far plane
-	ebitenutil.DrawLine(screen, r.p[4].X, r.p[4].Y, r.p[5].X, r.p[5].Y, clr)
-	ebitenutil.DrawLine(screen, r.p[5].X, r.p[5].Y, r.p[6].X, r.p[6].Y, clr)
-	ebitenutil.DrawLine(screen, r.p[6].X, r.p[6].Y, r.p[7].X, r.p[7].Y, clr)
-	ebitenutil.DrawLine(screen, r.p[7].X, r.p[7].Y, r.p[4].X, r.p[4].Y, clr)
+	DrawLine(screen, r.p[4], r.p[5], clr)
+	DrawLine(screen, r.p[5], r.p[6], clr)
+	DrawLine(screen, r.p[6], r.p[7], clr)
+	DrawLine(screen, r.p[7], r.p[4], clr)
 
 	// Drawing connections between planes
-	ebitenutil.DrawLine(screen, r.p[0].X, r.p[0].Y, r.p[4].X, r.p[4].Y, clr)
-	ebitenutil.DrawLine(screen, r.p[1].X, r.p[1].Y, r.p[5].X, r.p[5].Y, clr)
-	ebitenutil.DrawLine(screen, r.p[2].X, r.p[2].Y, r.p[6].X, r.p[6].Y, clr)
-	ebitenutil.DrawLine(screen, r.p[3].X, r.p[3].Y, r.p[7].X, r.p[7].Y, clr)
+	DrawLine(screen, r.p[0], r.p[4], clr)
+	DrawLine(screen, r.p[1], r.p[5], clr)
+	DrawLine(screen, r.p[2], r.p[6], clr)
+	DrawLine(screen, r.p[3], r.p[7], clr)
 }
 
 type game struct {
-	c            *Cube
+	c            []Cube
 	screenBuffer *ebiten.Image
 }
 
 func NewGame() *game {
 	halfWidth, halfHeight := float64(screenWidth/2), float64(screenHeight/2)
 	return &game{
-		&Cube{
-			[8]Vec{
-				{-200 + halfWidth, -200 + halfHeight, 200}, // NearBottomLeft
-				{-200 + halfWidth, 200 + halfHeight, 200},  // NearTopLeft
-				{200 + halfWidth, 200 + halfHeight, 200},   // NearTopRight
-				{200 + halfWidth, -200 + halfHeight, 200},  // NearBottomRight
+		[]Cube{
+			{
+				[8]Vec{
+					{-200 + halfWidth, -200 + halfHeight, 200}, // NearBottomLeft
+					{-200 + halfWidth, 200 + halfHeight, 200},  // NearTopLeft
+					{200 + halfWidth, 200 + halfHeight, 200},   // NearTopRight
+					{200 + halfWidth, -200 + halfHeight, 200},  // NearBottomRightS
 
-				{-200 + halfWidth, -200 + halfHeight, 600}, // FarBottomLeft
-				{-200 + halfWidth, 200 + halfHeight, 600},  // FarTopLeft
-				{200 + halfWidth, 200 + halfHeight, 600},   // FarTopRight
-				{200 + halfWidth, -200 + halfHeight, 600},  // FarBottomRight
+					{-200 + halfWidth, -200 + halfHeight, 250}, // FarBottomLeft
+					{-200 + halfWidth, 200 + halfHeight, 250},  // FarTopLeft
+					{200 + halfWidth, 200 + halfHeight, 250},   // FarTopRight
+					{200 + halfWidth, -200 + halfHeight, 250},  // FarBottomRight
+				},
 			},
+			// {
+			// 	[8]Vec{
+			// 		{-400 + halfWidth, -200 + halfHeight, 200}, // NearBottomLeft
+			// 		{-400 + halfWidth, 200 + halfHeight, 200},  // NearTopLeft
+			// 		{halfWidth, 200 + halfHeight, 200},         // NearTopRight
+			// 		{halfWidth, -200 + halfHeight, 200},        // NearBottomRight
+
+			// 		{-400 + halfWidth, -200 + halfHeight, 600}, // FarBottomLeft
+			// 		{-400 + halfWidth, 200 + halfHeight, 600},  // FarTopLeft
+			// 		{halfWidth, 200 + halfHeight, 600},         // FarTopRight
+			// 		{halfWidth, -200 + halfHeight, 600},        // FarBottomRight
+			// 	},
+			// },
 		},
 		ebiten.NewImage(screenWidth, screenHeight),
 	}
@@ -132,18 +153,21 @@ func NewGame() *game {
 
 func (g *game) Layout(outWidth, outHeight int) (w, h int) { return screenWidth, screenHeight }
 func (g *game) Update() error {
-	g.c.Rotate(g.screenBuffer, Rotator{math.Pi / 180, math.Pi / 180, math.Pi / 180})
+	for i := range g.c {
+		g.c[i].Rotate(g.screenBuffer, Rotator{0, 0, math.Pi / 180})
+	}
 	return nil
 }
 func (g *game) Draw(screen *ebiten.Image) {
-	g.c.Draw(screen, color.RGBA{255, 102, 204, 255})
+	for i := range g.c {
+		g.c[i].Draw(screen, color.RGBA{255, 102, 204, 255})
+	}
 	screen.DrawImage(g.screenBuffer, &ebiten.DrawImageOptions{})
 }
 
 func main() {
 	ebiten.SetWindowSize(screenWidth, screenHeight)
 	g := NewGame()
-
 	if err := ebiten.RunGame(g); err != nil {
 		log.Fatal(err)
 	}
