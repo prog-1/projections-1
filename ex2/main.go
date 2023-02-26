@@ -49,10 +49,80 @@ func (g *game) rotateZ() {
 		g.p[i].y = v.y*math.Cos(-0.0174533) - v.z*math.Sin(-0.0174533)
 		g.p[i].z = v.y*math.Sin(-0.0174533) + v.z*math.Cos(-0.0174533)
 	}
-	// g.sin += -0.0174533
+	g.sin += -0.0174533
 
 }
+func Dot(a, b point) float64 {
+	return a.x*b.x + a.y*b.y + a.z*b.z
+}
 
+func Cross(a, b point) point {
+	return point{
+		x: a.y*b.z - a.z*b.y,
+		y: a.z*b.x - a.x*b.z,
+		z: a.x*b.y - a.y*b.x,
+	}
+}
+func Normalize(v point) point {
+	magnitude := math.Sqrt(v.x*v.x + v.y*v.y + v.z*v.z)
+	return point{
+		x: v.x / magnitude,
+		y: v.y / magnitude,
+		z: v.z / magnitude,
+	}
+}
+
+func IsFacingScreen(a, b point) bool {
+	// Calculate the normal vector of the plane defined by a and b
+	normal := Normalize(Cross(a, b))
+
+	// Check if the dot product of the normal and the view vector is positive
+	viewVector := point{x: 0, y: 0, z: 1}
+	dotProduct := Dot(normal, viewVector)
+
+	return dotProduct > 0
+}
+
+func (g *game) Layout(outWidth, outHeight int) (w, h int) { return screenWidth, screenHeight }
+
+func (g *game) Update() error {
+	g.rotateX()
+	g.rotateY()
+	g.rotateZ()
+	return nil
+}
+func (g *game) Draw(screen *ebiten.Image) {
+	for i := 0; i < 24; i += 4 {
+		tmp1 := point{
+			g.p[g.planes[i][1]].x - g.p[g.planes[i][0]].x,
+			g.p[g.planes[i][1]].y - g.p[g.planes[i][0]].y,
+			g.p[g.planes[i][1]].z - g.p[g.planes[i][0]].z}
+		tmp2 := point{
+			g.p[g.planes[i+1][1]].x - g.p[g.planes[i+1][0]].x,
+			g.p[g.planes[i+1][1]].y - g.p[g.planes[i+1][0]].y,
+			g.p[g.planes[i+1][1]].z - g.p[g.planes[i+1][0]].z}
+		if !IsFacingScreen(tmp1, tmp2) {
+			for i1 := i; i1 < i+4; i1++ {
+				ebitenutil.DrawLine(screen,
+					(g.p[g.planes[i1][0]].x/(g.p[g.planes[i1][0]].z+1000))*900+float64(screenWidth/2),
+					(g.p[g.planes[i1][0]].y/(g.p[g.planes[i1][0]].z+1000))*900+float64(screenHeight/2),
+					(g.p[g.planes[i1][1]].x/(g.p[g.planes[i1][1]].z+1000))*900+float64(screenWidth/2),
+					(g.p[g.planes[i1][1]].y/(g.p[g.planes[i1][1]].z+1000))*900+float64(screenHeight/2),
+					color.White)
+			}
+		}
+	}
+}
+
+func main() {
+	ebiten.SetWindowTitle(winTitle)
+	ebiten.SetWindowSize(screenWidth, screenHeight)
+	ebiten.SetWindowResizable(true)
+	g := NewGame()
+	if err := ebiten.RunGame(g); err != nil {
+		log.Fatal(err)
+	}
+}
 func NewGame() *game {
 
 	return &game{
@@ -112,53 +182,5 @@ func NewGame() *game {
 			{4, 0},
 			{4, 7},
 		},
-	}
-}
-
-func (g *game) Layout(outWidth, outHeight int) (w, h int) { return screenWidth, screenHeight }
-
-func (g *game) Update() error {
-	g.rotateX()
-	g.rotateY()
-	g.rotateZ()
-	return nil
-}
-func (g *game) Draw(screen *ebiten.Image) {
-	for i := 0; i < 24; i += 4 {
-		if (g.p[g.planes[i][0]].z-g.p[g.planes[i][1]].z)*(g.p[g.planes[i+1][0]].z-g.p[g.planes[i+1][1]].z) < 0 {
-			for i1 := i; i1 < i+4; i1++ {
-				ebitenutil.DrawLine(screen,
-					(g.p[g.planes[i1][0]].x/(g.p[g.planes[i1][0]].z+1000))*900+float64(screenWidth/2),
-					(g.p[g.planes[i1][0]].y/(g.p[g.planes[i1][0]].z+1000))*900+float64(screenHeight/2),
-					(g.p[g.planes[i1][1]].x/(g.p[g.planes[i1][1]].z+1000))*900+float64(screenWidth/2),
-					(g.p[g.planes[i1][1]].y/(g.p[g.planes[i1][1]].z+1000))*900+float64(screenHeight/2),
-					color.White)
-			}
-		}
-	}
-}
-
-// for _, v := range g.join {
-// 	vec := point{x: g.p[v[1]].x * g.p[v[0]].x, y: g.p[v[1]].y * g.p[v[0]].y, z: g.p[v[1]].z * g.p[v[0]].z}
-// 	if vec.z > 0 {
-// 		ebitenutil.DrawLine(screen,
-// 			(g.p[v[0]].x/(g.p[v[0]].z+1000))*900+float64(screenWidth/2),
-// 			(g.p[v[0]].y/(g.p[v[0]].z+1000))*900+float64(screenHeight/2),
-// 			(g.p[v[1]].x/(g.p[v[1]].z+1000))*900+float64(screenWidth/2),
-// 			(g.p[v[1]].y/(g.p[v[1]].z+1000))*900+float64(screenHeight/2),
-// 			color.White)
-// 	}
-// 	const msg = "Никита Гуданов"
-// 	r := text.BoundString(g.font, msg)
-// 	text.Draw(screen, msg, g.font, (screen.Bounds().Dx()-r.Dx())/2, screen.Bounds().Dy()/2, color.White)
-// }
-
-func main() {
-	ebiten.SetWindowTitle(winTitle)
-	ebiten.SetWindowSize(screenWidth, screenHeight)
-	ebiten.SetWindowResizable(true)
-	g := NewGame()
-	if err := ebiten.RunGame(g); err != nil {
-		log.Fatal(err)
 	}
 }
