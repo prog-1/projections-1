@@ -40,18 +40,18 @@ func NewGame(width, height int) *Game {
 			{300, -300, 300},
 		},
 		join: [][2]int{
-			{0, 1},
-			{0, 3},
-			{2, 1},
-			{2, 3},
-			{1, 5},
-			{0, 4},
-			{2, 6},
-			{3, 7},
 			{4, 5},
 			{5, 6},
 			{6, 7},
 			{7, 4},
+			{0, 1},
+			{0, 3},
+			{2, 1},
+			{0, 4},
+			{2, 6},
+			{3, 7},
+			{2, 3},
+			{1, 5},
 		},
 	}
 }
@@ -91,10 +91,10 @@ func (g *Game) Update() error {
 func (g *Game) Draw(screen *ebiten.Image) {
 	for _, v := range g.join {
 		ebitenutil.DrawLine(screen,
-			(g.o[v[0]].x/(g.o[v[0]].z+1000))*900+float64(screenWidth/2),
-			(g.o[v[0]].y/(g.o[v[0]].z+1000))*900+float64(screenHeight/2),
-			(g.o[v[1]].x/(g.o[v[1]].z+1000))*900+float64(screenWidth/2),
-			(g.o[v[1]].y/(g.o[v[1]].z+1000))*900+float64(screenHeight/2),
+			(g.o[v[0]].x/(g.o[v[0]].z+900))*700+float64(screenWidth/2),
+			(g.o[v[0]].y/(g.o[v[0]].z+900))*700+float64(screenHeight/2),
+			(g.o[v[1]].x/(g.o[v[1]].z+900))*700+float64(screenWidth/2),
+			(g.o[v[1]].y/(g.o[v[1]].z+900))*700+float64(screenHeight/2),
 			col)
 	}
 
