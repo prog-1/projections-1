@@ -34,6 +34,14 @@ func Mod(a Vec) float64 {
 	return math.Sqrt(a.X*a.X + a.Y*a.Y + a.Z*a.Z)
 }
 
+func Normalize(v Vec) Vec {
+    return Vec{
+		v.X / Mod(v),
+        v.Y / Mod(v),
+        v.Z / Mod(v),
+	}
+}
+
 type Rotator struct {
 	X, Y, Z float64
 }
@@ -103,23 +111,41 @@ func (c *Cube) Rotate(screen *ebiten.Image, r Rotator) {
 }
 
 func (r *Cube) Draw(screen *ebiten.Image, clr color.Color) {
-	// Drawing near plane
-	DrawLine(screen, r.p[0], r.p[1], clr)
-	DrawLine(screen, r.p[1], r.p[2], clr)
-	DrawLine(screen, r.p[2], r.p[3], clr)
-	DrawLine(screen, r.p[3], r.p[0], clr)
+	// Near plane
+  	DrawLine(screen, r.p[0], r.p[1], color.White)
+  	DrawLine(screen, r.p[1], r.p[2], color.White)
+  	DrawLine(screen, r.p[2], r.p[3], color.White)
+  	DrawLine(screen, r.p[3], r.p[0], color.White)
 
-	// Drawing far plane
+	// Far plane
 	DrawLine(screen, r.p[4], r.p[5], clr)
 	DrawLine(screen, r.p[5], r.p[6], clr)
 	DrawLine(screen, r.p[6], r.p[7], clr)
 	DrawLine(screen, r.p[7], r.p[4], clr)
 
-	// Drawing connections between planes
+	//Left plane
+	DrawLine(screen, r.p[4], r.p[5], clr)
+	DrawLine(screen, r.p[5], r.p[1], clr)
+	DrawLine(screen, r.p[1], r.p[0], clr)
 	DrawLine(screen, r.p[0], r.p[4], clr)
+
+	// Top plane
 	DrawLine(screen, r.p[1], r.p[5], clr)
+	DrawLine(screen, r.p[5], r.p[6], clr)
+	DrawLine(screen, r.p[6], r.p[2], clr)
+	DrawLine(screen, r.p[2], r.p[1], clr)
+
+	// Right plane
+	DrawLine(screen, r.p[3], r.p[2], clr)
 	DrawLine(screen, r.p[2], r.p[6], clr)
+	DrawLine(screen, r.p[6], r.p[7], clr)
+	DrawLine(screen, r.p[7], r.p[3], clr)
+	
+	// Bottom plane
+	DrawLine(screen, r.p[4], r.p[0], clr)
+	DrawLine(screen, r.p[0], r.p[3], clr)
 	DrawLine(screen, r.p[3], r.p[7], clr)
+	DrawLine(screen, r.p[4], r.p[4], clr)
 }
 
 type game struct {
