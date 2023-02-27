@@ -52,7 +52,7 @@ func (v *Vec) RotateY(rad float64) {
 
 func (v *Vec) RotateX(rad float64) {
 	y := v.Y*math.Cos(rad) - v.Z*math.Sin(rad)
-	z := -v.Y*math.Sin(rad) + v.Z*math.Cos(rad)
+	z := v.Y*math.Sin(rad) + v.Z*math.Cos(rad)
 	v.Y, v.Z = y, z
 }
 
@@ -151,7 +151,7 @@ func NewGame() *game {
 func (g *game) Layout(outWidth, outHeight int) (w, h int) { return screenWidth, screenHeight }
 func (g *game) Update() error {
 	for i := range g.c {
-		g.c[i].Rotate(g.screenBuffer, Rotator{0, math.Pi / 180, 0})
+		g.c[i].Rotate(g.screenBuffer, Rotator{math.Pi / 180, math.Pi / 180, math.Pi / 180})
 	}
 	return nil
 }
