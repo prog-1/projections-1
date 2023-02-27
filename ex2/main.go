@@ -24,9 +24,7 @@ type (
 	}
 	game struct {
 		p      [8]point
-		join   [][2]int
 		planes [][2]int
-		sin    float64
 	}
 )
 
@@ -49,38 +47,12 @@ func (g *game) rotateZ() {
 		g.p[i].y = v.y*math.Cos(-0.0174533) - v.z*math.Sin(-0.0174533)
 		g.p[i].z = v.y*math.Sin(-0.0174533) + v.z*math.Cos(-0.0174533)
 	}
-	g.sin += -0.0174533
 
 }
-func Dot(a, b point) float64 {
-	return a.x*b.x + a.y*b.y + a.z*b.z
-}
 
-func Cross(a, b point) point {
-	return point{
-		x: a.y*b.z - a.z*b.y,
-		y: a.z*b.x - a.x*b.z,
-		z: a.x*b.y - a.y*b.x,
-	}
-}
-func Normalize(v point) point {
-	magnitude := math.Sqrt(v.x*v.x + v.y*v.y + v.z*v.z)
-	return point{
-		x: v.x / magnitude,
-		y: v.y / magnitude,
-		z: v.z / magnitude,
-	}
-}
+func Cross(a, b point) bool {
+	return a.x*b.y-a.y*b.x < 0
 
-func IsFacingScreen(a, b point) bool {
-	// Calculate the normal vector of the plane defined by a and b
-	normal := Normalize(Cross(a, b))
-
-	// Check if the dot product of the normal and the view vector is positive
-	viewVector := point{x: 0, y: 0, z: 1}
-	dotProduct := Dot(normal, viewVector)
-
-	return dotProduct > 0
 }
 
 func (g *game) Layout(outWidth, outHeight int) (w, h int) { return screenWidth, screenHeight }
@@ -92,54 +64,31 @@ func (g *game) Update() error {
 	return nil
 }
 func (g *game) Draw(screen *ebiten.Image) {
-	// visiblePlanes := make([]int, 0)
 
-	// Check each plane if it's facing the screen, and if it is, add its index to the slice
 	for i := 0; i < len(g.planes); i += 4 {
-		a := g.p[g.planes[i][0]]
-		b := g.p[g.planes[i][1]]
-		if IsFacingScreen(a, b) {
+		a := point{
+			g.p[g.planes[i][1]].x - g.p[g.planes[i][0]].x,
+			g.p[g.planes[i][1]].x - g.p[g.planes[i][0]].y,
+			g.p[g.planes[i][1]].x - g.p[g.planes[i][0]].z,
+		}
+
+		b := point{
+			g.p[g.planes[i+1][1]].x - g.p[g.planes[i+1][0]].x,
+			g.p[g.planes[i+1][1]].x - g.p[g.planes[i+1][0]].y,
+			g.p[g.planes[i+1][1]].x - g.p[g.planes[i+1][0]].z,
+		}
+		if Cross(a, b) {
 			for i1 := i; i1 < i+4; i1++ {
 				ebitenutil.DrawLine(screen,
-					(g.p[g.planes[i1][0]].x/(g.p[g.planes[i1][0]].z+1000))*900+float64(screenWidth/2),
-					(g.p[g.planes[i1][0]].y/(g.p[g.planes[i1][0]].z+1000))*900+float64(screenHeight/2),
-					(g.p[g.planes[i1][1]].x/(g.p[g.planes[i1][1]].z+1000))*900+float64(screenWidth/2),
-					(g.p[g.planes[i1][1]].y/(g.p[g.planes[i1][1]].z+1000))*900+float64(screenHeight/2),
+					(g.p[g.planes[i1][0]].x/(g.p[g.planes[i1][0]].z+1000))*-900+float64(screenWidth/2),
+					(g.p[g.planes[i1][0]].y/(g.p[g.planes[i1][0]].z+1000))*-900+float64(screenHeight/2),
+					(g.p[g.planes[i1][1]].x/(g.p[g.planes[i1][1]].z+1000))*-900+float64(screenWidth/2),
+					(g.p[g.planes[i1][1]].y/(g.p[g.planes[i1][1]].z+1000))*-900+float64(screenHeight/2),
 					color.White)
 			}
 		}
 	}
 
-	// Draw only the visible planes
-	// for _, i := range visiblePlanes {
-	// 	a := g.p[g.planes[i][0]]
-	// 	b := g.p[g.planes[i][1]]
-	// 	ebitenutil.DrawLine(screen,
-	// 		a.x/(a.z+1000)*900+screenWidth/2,
-	// 		a.y/(a.z+1000)*900+screenHeight/2,
-	// 		b.x/(b.z+1000)*900+screenWidth/2,
-	// 		b.y/(b.z+1000)*900+screenHeight/2, c)
-	// }
-	// for i := 0; i < 24; i += 4 {
-	// 	tmp1 := point{
-	// 		g.p[g.planes[i][0]].x,
-	// 		g.p[g.planes[i][0]].y,
-	// 		g.p[g.planes[i][0]].z}
-	// 	tmp2 := point{
-	// 		g.p[g.planes[i][1]].x,
-	// 		g.p[g.planes[i][1]].y,
-	// 		g.p[g.planes[i][1]].z}
-	// 	if IsFacingScreen(tmp1, tmp2) {
-	// 		for i1 := i; i1 < i+4; i1++ {
-	// 			ebitenutil.DrawLine(screen,
-	// 				(g.p[g.planes[i1][0]].x/(g.p[g.planes[i1][0]].z+1000))*900+float64(screenWidth/2),
-	// 				(g.p[g.planes[i1][0]].y/(g.p[g.planes[i1][0]].z+1000))*900+float64(screenHeight/2),
-	// 				(g.p[g.planes[i1][1]].x/(g.p[g.planes[i1][1]].z+1000))*900+float64(screenWidth/2),
-	// 				(g.p[g.planes[i1][1]].y/(g.p[g.planes[i1][1]].z+1000))*900+float64(screenHeight/2),
-	// 				color.White)
-	// 		}
-	// 	}
-	// }
 }
 
 func main() {
@@ -155,60 +104,47 @@ func NewGame() *game {
 
 	return &game{
 		p: [8]point{
-			{-300, -300, -300},
-			{-300, 300, -300},
-			{300, 300, -300},
-			{300, -300, -300},
-			{-300, -300, 300},
-			{-300, 300, 300},
-			{300, 300, 300},
-			{300, -300, 300},
-		},
-		join: [][2]int{
-			{0, 1},
-			{0, 3},
-			{2, 1},
-			{2, 3},
-			{1, 5},
-			{0, 4},
-			{2, 6},
-			{3, 7},
-			{4, 5},
-			{5, 6},
-			{6, 7},
-			{7, 4},
+			{300, -300, -300},  //0
+			{-300, -300, -300}, //1
+			{-300, 300, -300},  //2
+			{300, 300, -300},   //3
+
+			{300, -300, 300},  //4
+			{-300, -300, 300}, //5
+			{-300, 300, 300},  //6
+			{300, 300, 300},   //7
 		},
 		planes: [][2]int{
 			// near plane
 			{0, 1},
-			{0, 3},
-			{2, 1},
+			{1, 2},
 			{2, 3},
+			{3, 0},
 			// far plane
+			{4, 7},
 			{7, 6},
-			{7, 4},
-			{5, 6},
+			{6, 5},
 			{5, 4},
 			//  top plane
-			{2, 6},
-			{2, 1},
-			{5, 6},
 			{5, 1},
-			//left plane
-			{5, 1},
-			{5, 4},
+			{1, 0},
 			{0, 4},
-			{0, 1},
-			//right plane
+			{4, 5},
+			//left plane
 			{6, 2},
-			{6, 7},
-			{3, 7},
-			{3, 2},
-			//bottom plane
-			{3, 7},
-			{3, 0},
+			{2, 1},
+			{1, 5},
+			{5, 6},
+			//right plane
 			{4, 0},
-			{4, 7},
+			{0, 3},
+			{3, 7},
+			{7, 4},
+			//bottom plane
+			{6, 7},
+			{7, 3},
+			{3, 2},
+			{2, 6},
 		},
 	}
 }
