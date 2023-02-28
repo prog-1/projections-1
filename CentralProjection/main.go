@@ -95,7 +95,7 @@ func DrawLine(screen *ebiten.Image, a, b Vec, clr color.Color) {
 	// k := float64(250)
 	// a = CentralProjection(a, k)
 	// b = CentralProjection(b, k)
-	ebitenutil.DrawLine(screen, a.X+halfWidth, a.Y+halfHeight, b.X+halfWidth, b.Y+halfHeight, clr)
+	ebitenutil.DrawLine(screen, a.X+halfWidth, -a.Y+halfHeight, b.X+halfWidth, -b.Y+halfHeight, clr)
 }
 
 type Rect struct {
@@ -124,43 +124,48 @@ func (c *Cube) Rotate(screen *ebiten.Image, r Rotator) {
 
 func (c *Cube) Draw(screen *ebiten.Image, clr color.Color) {
 
-	ctr := Add(Divide(Sub(c.p[2], c.p[0]), 2), c.p[0])
-	v := Sub(c.p[1], c.p[2])
-	w := Sub(c.p[2], c.p[3])
-	cr := Multiply(Normalize(Cross(v, w)), 500)
-	DrawLine(screen, ctr, cr, color.RGBA{255, 0, 0, 255})
+	// da, db stands for diagonal a and b(diagonal starting and ending points)
+	DrawNormal := func(da, db, v, w Vec) {
+		DrawLine(screen, Add(Divide(Sub(da, db), 2), db), Multiply(Normalize(Cross(v, w)), 500), color.RGBA{255, 0, 0, 255})
+	}
 
 	// Near plane
+	DrawNormal(c.p[2], c.p[0], Sub(c.p[1], c.p[2]), Sub(c.p[2], c.p[3]))
 	DrawLine(screen, c.p[0], c.p[1], color.White)
 	DrawLine(screen, c.p[1], c.p[2], color.White)
 	DrawLine(screen, c.p[2], c.p[3], color.White)
 	DrawLine(screen, c.p[3], c.p[0], color.White)
 
 	// Far plane
+	DrawNormal(c.p[5], c.p[7], Sub(c.p[6], c.p[5]), Sub(c.p[5], c.p[4]))
 	DrawLine(screen, c.p[4], c.p[5], clr)
 	DrawLine(screen, c.p[5], c.p[6], clr)
 	DrawLine(screen, c.p[6], c.p[7], clr)
 	DrawLine(screen, c.p[7], c.p[4], clr)
 
 	//Left plane
+	DrawNormal(c.p[0], c.p[5], Sub(c.p[5], c.p[1]), Sub(c.p[1], c.p[0]))
 	DrawLine(screen, c.p[4], c.p[5], clr)
 	DrawLine(screen, c.p[5], c.p[1], clr)
 	DrawLine(screen, c.p[1], c.p[0], clr)
 	DrawLine(screen, c.p[0], c.p[4], clr)
 
 	// Top plane
+	DrawNormal(c.p[6], c.p[1], Sub(c.p[5], c.p[6]), Sub(c.p[6], c.p[2]))
 	DrawLine(screen, c.p[1], c.p[5], clr)
 	DrawLine(screen, c.p[5], c.p[6], clr)
 	DrawLine(screen, c.p[6], c.p[2], clr)
 	DrawLine(screen, c.p[2], c.p[1], clr)
 
 	// Right plane
+	DrawNormal(c.p[6], c.p[3], Sub(c.p[2], c.p[6]), Sub(c.p[6], c.p[7]))
 	DrawLine(screen, c.p[3], c.p[2], clr)
 	DrawLine(screen, c.p[2], c.p[6], clr)
 	DrawLine(screen, c.p[6], c.p[7], clr)
 	DrawLine(screen, c.p[7], c.p[3], clr)
 
 	// Bottom plane
+	DrawNormal(c.p[0], c.p[7], Sub(c.p[0], c.p[3]), Sub(c.p[3], c.p[7]))
 	DrawLine(screen, c.p[4], c.p[0], clr)
 	DrawLine(screen, c.p[0], c.p[3], clr)
 	DrawLine(screen, c.p[3], c.p[7], clr)
