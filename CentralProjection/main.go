@@ -92,9 +92,9 @@ func CentralProjection(v Vec, k float64) Vec {
 
 func DrawLine(screen *ebiten.Image, a, b Vec, clr color.Color) {
 	halfWidth, halfHeight := float64(screenWidth/2), float64(screenHeight/2)
-	k := float64(250)
-	a = CentralProjection(a, k)
-	b = CentralProjection(b, k)
+	// k := float64(250)
+	// a = CentralProjection(a, k)
+	// b = CentralProjection(b, k)
 	ebitenutil.DrawLine(screen, a.X+halfWidth, a.Y+halfHeight, b.X+halfWidth, b.Y+halfHeight, clr)
 }
 
@@ -123,22 +123,13 @@ func (c *Cube) Rotate(screen *ebiten.Image, r Rotator) {
 }
 
 func (c *Cube) Draw(screen *ebiten.Image, clr color.Color) {
-	//hw, hh := Mod(Sub(c.p[3], c.p[0]))/2, Mod(Sub(c.p[1], c.p[0]))/2
-	// w = 3 - 2
-	// v = 1 - 2
 
-	// w := Sub(r.p[3], r.p[2])
-	// v := Sub(r.p[1], r.p[2])
-	// cr := Cross(v, w)
-	// n := Multiply(Normalize(cr), 10)
-	//ctr := Vec{c.p[0].X + hw, c.p[0].Y + hh, c.p[0].Z}
-
-	// v = 1 - 2
-	// w = 3 - 2
-	// ebitenutil.DrawCircle(screen, c.p[0].X, c.p[0].Y, 10, color.RGBA{0, 0, 255, 255})
 	ctr := Add(Divide(Sub(c.p[2], c.p[0]), 2), c.p[0])
-	cr := Add(ctr, Cross(Sub(c.p[2], c.p[1]), Sub(c.p[3], c.p[2])))
+	v := Sub(c.p[1], c.p[2])
+	w := Sub(c.p[2], c.p[3])
+	cr := Multiply(Normalize(Cross(v, w)), 500)
 	DrawLine(screen, ctr, cr, color.RGBA{255, 0, 0, 255})
+
 	// Near plane
 	DrawLine(screen, c.p[0], c.p[1], color.White)
 	DrawLine(screen, c.p[1], c.p[2], color.White)
@@ -189,7 +180,7 @@ func NewGame() *game {
 					{-200, -200, 200}, // NearBottomLeft
 					{-200, 200, 200},  // NearTopLeft
 					{200, 200, 200},   // NearTopRight
-					{200, -200, 200},  // NearBottomRightS
+					{200, -200, 200},  // NearBottomRight
 
 					{-200, -200, 600}, // FarBottomLeft
 					{-200, 200, 600},  // FarTopLeft
@@ -205,7 +196,7 @@ func NewGame() *game {
 func (g *game) Layout(outWidth, outHeight int) (w, h int) { return screenWidth, screenHeight }
 func (g *game) Update() error {
 	for i := range g.c {
-		g.c[i].Rotate(g.screenBuffer, Rotator{math.Pi / 180, math.Pi / 180, math.Pi / 180})
+		g.c[i].Rotate(g.screenBuffer, Rotator{0, math.Pi / 180, 0})
 	}
 	return nil
 }
@@ -219,12 +210,20 @@ func (g *game) Draw(screen *ebiten.Image) {
 func main() {
 	ebiten.SetWindowSize(screenWidth, screenHeight)
 	g := NewGame()
-	for i := range g.c {
-		g.c[i].Rotate(g.screenBuffer, Rotator{0, math.Pi / 180 * 90, 0})
-	}
 
-	// a, b := Vec{2, 3, 4}, Vec{5, 6, 7}
-	// ebitenutil.DebugPrintAt(g.screenBuffer, fmt.Sprintf("%v", Cross(a, b)), screenWidth-200, screenHeight-200)
+	// v := Vec{0, 0, 200}
+	// v.Rotate(Rotator{0, math.Pi / 180 * 30, 0})
+	// w := Vec{-200, 0, 0}
+	// w.Rotate(Rotator{0, math.Pi / 180 * 30, 0})
+	// cr := Multiply(Normalize(Cross(v, w)), 200)
+	// cr.Rotate(Rotator{0, math.Pi / 180 * 30, 0})
+	// DrawLine(g.screenBuffer, Vec{0, 0, 0}, v, color.RGBA{0, 0, 255, 255})
+	// DrawLine(g.screenBuffer, Vec{0, 0, 0}, w, color.RGBA{0, 255, 0, 255})
+	// DrawLine(g.screenBuffer, Vec{0, 0, 0}, cr, color.RGBA{255, 0, 0, 255})
+
+	for i := range g.c {
+		g.c[i].Rotate(g.screenBuffer, Rotator{0, -math.Pi / 180 * 30, 0})
+	}
 
 	if err := ebiten.RunGame(g); err != nil {
 		log.Fatal(err)
