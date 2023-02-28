@@ -126,50 +126,63 @@ func (c *Cube) Draw(screen *ebiten.Image, clr color.Color) {
 
 	// da, db stands for diagonal a and b(diagonal starting and ending points)
 	DrawNormal := func(da, db, v, w Vec) {
-		DrawLine(screen, Add(Divide(Sub(da, db), 2), db), Multiply(Normalize(Cross(v, w)), 500), color.RGBA{255, 0, 0, 255})
+		ctr := Add(Divide(Sub(da, db), 2), db)
+		DrawLine(screen, ctr, Add(Multiply(Normalize(Cross(v, w)), 200), ctr), color.RGBA{255, 0, 0, 255})
 	}
 
 	// Near plane
 	DrawNormal(c.p[2], c.p[0], Sub(c.p[1], c.p[2]), Sub(c.p[2], c.p[3]))
-	DrawLine(screen, c.p[0], c.p[1], color.White)
-	DrawLine(screen, c.p[1], c.p[2], color.White)
-	DrawLine(screen, c.p[2], c.p[3], color.White)
-	DrawLine(screen, c.p[3], c.p[0], color.White)
+	if cr := Cross(Sub(c.p[1], c.p[2]), Sub(c.p[2], c.p[3])); cr.Z > 0 {
+		DrawLine(screen, c.p[0], c.p[1], clr)
+		DrawLine(screen, c.p[1], c.p[2], clr)
+		DrawLine(screen, c.p[2], c.p[3], clr)
+		DrawLine(screen, c.p[3], c.p[0], clr)
+	}
 
 	// Far plane
 	DrawNormal(c.p[5], c.p[7], Sub(c.p[6], c.p[5]), Sub(c.p[5], c.p[4]))
-	DrawLine(screen, c.p[4], c.p[5], clr)
-	DrawLine(screen, c.p[5], c.p[6], clr)
-	DrawLine(screen, c.p[6], c.p[7], clr)
-	DrawLine(screen, c.p[7], c.p[4], clr)
+	if cr := Cross(Sub(c.p[6], c.p[5]), Sub(c.p[5], c.p[4])); cr.Z > 0 {
+		DrawLine(screen, c.p[4], c.p[5], clr)
+		DrawLine(screen, c.p[5], c.p[6], clr)
+		DrawLine(screen, c.p[6], c.p[7], clr)
+		DrawLine(screen, c.p[7], c.p[4], clr)
+	}
 
 	//Left plane
 	DrawNormal(c.p[0], c.p[5], Sub(c.p[5], c.p[1]), Sub(c.p[1], c.p[0]))
-	DrawLine(screen, c.p[4], c.p[5], clr)
-	DrawLine(screen, c.p[5], c.p[1], clr)
-	DrawLine(screen, c.p[1], c.p[0], clr)
-	DrawLine(screen, c.p[0], c.p[4], clr)
+	if cr := Cross(Sub(c.p[5], c.p[1]), Sub(c.p[1], c.p[0])); cr.Z > 0 {
+		DrawLine(screen, c.p[4], c.p[5], clr)
+		DrawLine(screen, c.p[5], c.p[1], clr)
+		DrawLine(screen, c.p[1], c.p[0], clr)
+		DrawLine(screen, c.p[0], c.p[4], clr)
+	}
 
 	// Top plane
 	DrawNormal(c.p[6], c.p[1], Sub(c.p[5], c.p[6]), Sub(c.p[6], c.p[2]))
-	DrawLine(screen, c.p[1], c.p[5], clr)
-	DrawLine(screen, c.p[5], c.p[6], clr)
-	DrawLine(screen, c.p[6], c.p[2], clr)
-	DrawLine(screen, c.p[2], c.p[1], clr)
+	if cr := Cross(Sub(c.p[5], c.p[6]), Sub(c.p[6], c.p[2])); cr.Z > 0 {
+		DrawLine(screen, c.p[1], c.p[5], clr)
+		DrawLine(screen, c.p[5], c.p[6], clr)
+		DrawLine(screen, c.p[6], c.p[2], clr)
+		DrawLine(screen, c.p[2], c.p[1], clr)
+	}
 
 	// Right plane
 	DrawNormal(c.p[6], c.p[3], Sub(c.p[2], c.p[6]), Sub(c.p[6], c.p[7]))
-	DrawLine(screen, c.p[3], c.p[2], clr)
-	DrawLine(screen, c.p[2], c.p[6], clr)
-	DrawLine(screen, c.p[6], c.p[7], clr)
-	DrawLine(screen, c.p[7], c.p[3], clr)
+	if cr := Cross(Sub(c.p[2], c.p[6]), Sub(c.p[6], c.p[7])); cr.Z > 0 {
+		DrawLine(screen, c.p[3], c.p[2], clr)
+		DrawLine(screen, c.p[2], c.p[6], clr)
+		DrawLine(screen, c.p[6], c.p[7], clr)
+		DrawLine(screen, c.p[7], c.p[3], clr)
+	}
 
 	// Bottom plane
 	DrawNormal(c.p[0], c.p[7], Sub(c.p[0], c.p[3]), Sub(c.p[3], c.p[7]))
-	DrawLine(screen, c.p[4], c.p[0], clr)
-	DrawLine(screen, c.p[0], c.p[3], clr)
-	DrawLine(screen, c.p[3], c.p[7], clr)
-	DrawLine(screen, c.p[4], c.p[4], clr)
+	if cr := Cross(Sub(c.p[0], c.p[3]), Sub(c.p[3], c.p[7])); cr.Z > 0 {
+		DrawLine(screen, c.p[4], c.p[0], clr)
+		DrawLine(screen, c.p[0], c.p[3], clr)
+		DrawLine(screen, c.p[3], c.p[7], clr)
+		DrawLine(screen, c.p[4], c.p[4], clr)
+	}
 }
 
 type game struct {
@@ -201,7 +214,7 @@ func NewGame() *game {
 func (g *game) Layout(outWidth, outHeight int) (w, h int) { return screenWidth, screenHeight }
 func (g *game) Update() error {
 	for i := range g.c {
-		g.c[i].Rotate(g.screenBuffer, Rotator{0, math.Pi / 180, 0})
+		g.c[i].Rotate(g.screenBuffer, Rotator{math.Pi / 180, math.Pi / 180, math.Pi / 180})
 	}
 	return nil
 }
@@ -215,20 +228,6 @@ func (g *game) Draw(screen *ebiten.Image) {
 func main() {
 	ebiten.SetWindowSize(screenWidth, screenHeight)
 	g := NewGame()
-
-	// v := Vec{0, 0, 200}
-	// v.Rotate(Rotator{0, math.Pi / 180 * 30, 0})
-	// w := Vec{-200, 0, 0}
-	// w.Rotate(Rotator{0, math.Pi / 180 * 30, 0})
-	// cr := Multiply(Normalize(Cross(v, w)), 200)
-	// cr.Rotate(Rotator{0, math.Pi / 180 * 30, 0})
-	// DrawLine(g.screenBuffer, Vec{0, 0, 0}, v, color.RGBA{0, 0, 255, 255})
-	// DrawLine(g.screenBuffer, Vec{0, 0, 0}, w, color.RGBA{0, 255, 0, 255})
-	// DrawLine(g.screenBuffer, Vec{0, 0, 0}, cr, color.RGBA{255, 0, 0, 255})
-
-	for i := range g.c {
-		g.c[i].Rotate(g.screenBuffer, Rotator{0, -math.Pi / 180 * 30, 0})
-	}
 
 	if err := ebiten.RunGame(g); err != nil {
 		log.Fatal(err)
