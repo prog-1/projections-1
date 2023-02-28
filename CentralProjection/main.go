@@ -54,6 +54,10 @@ func Cross(a, b Vec) Vec {
 	}
 }
 
+func Dot(a, b Vec) float64 {
+	return a.X*b.X + a.Y*b.Y + a.Z*b.Z
+}
+
 type Rotator struct {
 	X, Y, Z float64
 }
@@ -92,9 +96,9 @@ func CentralProjection(v Vec, k float64) Vec {
 
 func DrawLine(screen *ebiten.Image, a, b Vec, clr color.Color) {
 	halfWidth, halfHeight := float64(screenWidth/2), float64(screenHeight/2)
-	// k := float64(250)
-	// a = CentralProjection(a, k)
-	// b = CentralProjection(b, k)
+	k := float64(250)
+	a = CentralProjection(a, k)
+	b = CentralProjection(b, k)
 	ebitenutil.DrawLine(screen, a.X+halfWidth, -a.Y+halfHeight, b.X+halfWidth, -b.Y+halfHeight, clr)
 }
 
@@ -132,7 +136,7 @@ func (c *Cube) Draw(screen *ebiten.Image, clr color.Color) {
 
 	// Near plane
 	DrawNormal(c.p[2], c.p[0], Sub(c.p[1], c.p[2]), Sub(c.p[2], c.p[3]))
-	if cr := Cross(Sub(c.p[1], c.p[2]), Sub(c.p[2], c.p[3])); cr.Z > 0 {
+	if cr := Cross(Sub(c.p[1], c.p[2]), Sub(c.p[2], c.p[3])); Dot(Vec{0, 0, 1}, cr) < 0 {
 		DrawLine(screen, c.p[0], c.p[1], clr)
 		DrawLine(screen, c.p[1], c.p[2], clr)
 		DrawLine(screen, c.p[2], c.p[3], clr)
@@ -141,7 +145,7 @@ func (c *Cube) Draw(screen *ebiten.Image, clr color.Color) {
 
 	// Far plane
 	DrawNormal(c.p[5], c.p[7], Sub(c.p[6], c.p[5]), Sub(c.p[5], c.p[4]))
-	if cr := Cross(Sub(c.p[6], c.p[5]), Sub(c.p[5], c.p[4])); cr.Z > 0 {
+	if cr := Cross(Sub(c.p[6], c.p[5]), Sub(c.p[5], c.p[4])); Dot(Vec{0, 0, 1}, cr) < 0 {
 		DrawLine(screen, c.p[4], c.p[5], clr)
 		DrawLine(screen, c.p[5], c.p[6], clr)
 		DrawLine(screen, c.p[6], c.p[7], clr)
@@ -150,7 +154,7 @@ func (c *Cube) Draw(screen *ebiten.Image, clr color.Color) {
 
 	//Left plane
 	DrawNormal(c.p[0], c.p[5], Sub(c.p[5], c.p[1]), Sub(c.p[1], c.p[0]))
-	if cr := Cross(Sub(c.p[5], c.p[1]), Sub(c.p[1], c.p[0])); cr.Z > 0 {
+	if cr := Cross(Sub(c.p[5], c.p[1]), Sub(c.p[1], c.p[0])); Dot(Vec{0, 0, 1}, cr) < 0 {
 		DrawLine(screen, c.p[4], c.p[5], clr)
 		DrawLine(screen, c.p[5], c.p[1], clr)
 		DrawLine(screen, c.p[1], c.p[0], clr)
@@ -159,7 +163,7 @@ func (c *Cube) Draw(screen *ebiten.Image, clr color.Color) {
 
 	// Top plane
 	DrawNormal(c.p[6], c.p[1], Sub(c.p[5], c.p[6]), Sub(c.p[6], c.p[2]))
-	if cr := Cross(Sub(c.p[5], c.p[6]), Sub(c.p[6], c.p[2])); cr.Z > 0 {
+	if cr := Cross(Sub(c.p[5], c.p[6]), Sub(c.p[6], c.p[2])); Dot(Vec{0, 0, 1}, cr) < 0 {
 		DrawLine(screen, c.p[1], c.p[5], clr)
 		DrawLine(screen, c.p[5], c.p[6], clr)
 		DrawLine(screen, c.p[6], c.p[2], clr)
@@ -168,7 +172,7 @@ func (c *Cube) Draw(screen *ebiten.Image, clr color.Color) {
 
 	// Right plane
 	DrawNormal(c.p[6], c.p[3], Sub(c.p[2], c.p[6]), Sub(c.p[6], c.p[7]))
-	if cr := Cross(Sub(c.p[2], c.p[6]), Sub(c.p[6], c.p[7])); cr.Z > 0 {
+	if cr := Cross(Sub(c.p[2], c.p[6]), Sub(c.p[6], c.p[7])); Dot(Vec{0, 0, 1}, cr) < 0 {
 		DrawLine(screen, c.p[3], c.p[2], clr)
 		DrawLine(screen, c.p[2], c.p[6], clr)
 		DrawLine(screen, c.p[6], c.p[7], clr)
@@ -177,7 +181,7 @@ func (c *Cube) Draw(screen *ebiten.Image, clr color.Color) {
 
 	// Bottom plane
 	DrawNormal(c.p[0], c.p[7], Sub(c.p[0], c.p[3]), Sub(c.p[3], c.p[7]))
-	if cr := Cross(Sub(c.p[0], c.p[3]), Sub(c.p[3], c.p[7])); cr.Z > 0 {
+	if cr := Cross(Sub(c.p[0], c.p[3]), Sub(c.p[3], c.p[7])); Dot(Vec{0, 0, 1}, cr) < 0 {
 		DrawLine(screen, c.p[4], c.p[0], clr)
 		DrawLine(screen, c.p[0], c.p[3], clr)
 		DrawLine(screen, c.p[3], c.p[7], clr)
@@ -214,7 +218,7 @@ func NewGame() *game {
 func (g *game) Layout(outWidth, outHeight int) (w, h int) { return screenWidth, screenHeight }
 func (g *game) Update() error {
 	for i := range g.c {
-		g.c[i].Rotate(g.screenBuffer, Rotator{math.Pi / 180, math.Pi / 180, math.Pi / 180})
+		g.c[i].Rotate(g.screenBuffer, Rotator{math.Pi / 180 / 2, math.Pi / 180 / 2, math.Pi / 180 / 2})
 	}
 	return nil
 }
