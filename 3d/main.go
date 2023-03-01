@@ -51,7 +51,7 @@ func (c *cube) RotateZ(angle float64) {
 func (c *cube) Draw(screen *ebiten.Image) {
 	for _, v := range c.Joints {
 		a := crossProduct(c.Points[v[0]], c.Points[v[1]])
-		if a.z < 0 {
+		if a.z > 0 {
 			continue
 		}
 		for i := 1; i <= 3; i++ {
