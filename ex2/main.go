@@ -30,29 +30,38 @@ type (
 
 func (g *game) rotateX() {
 	for i, v := range g.p {
-		g.p[i].x = v.x*math.Cos(0.025) - v.y*math.Sin(0.025)
-		g.p[i].y = v.x*math.Sin(0.025) + v.y*math.Cos(0.025)
+		g.p[i].x = v.x*math.Cos(0.0025) - v.y*math.Sin(0.0025)
+		g.p[i].y = v.x*math.Sin(0.0025) + v.y*math.Cos(0.0025)
 	}
 }
 
 func (g *game) rotateY() {
 	for i, v := range g.p {
-		g.p[i].x = v.x*math.Cos(0.0174533) - v.z*math.Sin(0.0174533)
-		g.p[i].z = v.x*math.Sin(0.0174533) + v.z*math.Cos(0.0174533)
+		g.p[i].x = v.x*math.Cos(0.00474533) - v.z*math.Sin(0.00474533)
+		g.p[i].z = v.x*math.Sin(0.00474533) + v.z*math.Cos(0.00474533)
 	}
 
 }
 func (g *game) rotateZ() {
 	for i, v := range g.p {
-		g.p[i].y = v.y*math.Cos(-0.0174533) - v.z*math.Sin(-0.0174533)
-		g.p[i].z = v.y*math.Sin(-0.0174533) + v.z*math.Cos(-0.0174533)
+		g.p[i].y = v.y*math.Cos(-0.00474533) - v.z*math.Sin(-0.00474533)
+		g.p[i].z = v.y*math.Sin(-0.00474533) + v.z*math.Cos(-0.00474533)
 	}
 
 }
 
-func Cross(a, b point) bool {
-	return a.x*b.y-a.y*b.x < 0
-
+func Cross(a, b point) point {
+	return point{
+		a.y*b.z - b.y*a.z,
+		a.z*b.x - b.z*a.x,
+		a.x*b.y - b.x*a.y,
+	}
+}
+func Dot(a, b point) float64 {
+	return a.x*b.x + a.y*b.y + a.z*b.z
+}
+func Multiply(v point, a float64) point {
+	return point{v.x * a, v.y * a, v.z * a}
 }
 
 func (g *game) Layout(outWidth, outHeight int) (w, h int) { return screenWidth, screenHeight }
@@ -63,28 +72,40 @@ func (g *game) Update() error {
 	g.rotateZ()
 	return nil
 }
+
 func (g *game) Draw(screen *ebiten.Image) {
 
 	for i := 0; i < len(g.planes); i += 4 {
 		a := point{
 			g.p[g.planes[i][1]].x - g.p[g.planes[i][0]].x,
-			g.p[g.planes[i][1]].x - g.p[g.planes[i][0]].y,
+			g.p[g.planes[i][1]].y - g.p[g.planes[i][0]].y,
 			g.p[g.planes[i][1]].x - g.p[g.planes[i][0]].z,
 		}
 
 		b := point{
 			g.p[g.planes[i+1][1]].x - g.p[g.planes[i+1][0]].x,
-			g.p[g.planes[i+1][1]].x - g.p[g.planes[i+1][0]].y,
+			g.p[g.planes[i+1][1]].y - g.p[g.planes[i+1][0]].y,
 			g.p[g.planes[i+1][1]].x - g.p[g.planes[i+1][0]].z,
 		}
-		if Cross(a, b) {
+		cross := Cross(a, b)
+		if Dot(point{0, 0, 1}, cross) < 0 {
 			for i1 := i; i1 < i+4; i1++ {
 				ebitenutil.DrawLine(screen,
-					(g.p[g.planes[i1][0]].x/(g.p[g.planes[i1][0]].z+1000))*-900+float64(screenWidth/2),
-					(g.p[g.planes[i1][0]].y/(g.p[g.planes[i1][0]].z+1000))*-900+float64(screenHeight/2),
-					(g.p[g.planes[i1][1]].x/(g.p[g.planes[i1][1]].z+1000))*-900+float64(screenWidth/2),
-					(g.p[g.planes[i1][1]].y/(g.p[g.planes[i1][1]].z+1000))*-900+float64(screenHeight/2),
+					(g.p[g.planes[i1][0]].x/(g.p[g.planes[i1][0]].z+1500))*-900+float64(screenWidth/2),
+					(g.p[g.planes[i1][0]].y/(g.p[g.planes[i1][0]].z+1500))*-900+float64(screenHeight/2),
+					(g.p[g.planes[i1][1]].x/(g.p[g.planes[i1][1]].z+1500))*-900+float64(screenWidth/2),
+					(g.p[g.planes[i1][1]].y/(g.p[g.planes[i1][1]].z+1500))*-900+float64(screenHeight/2),
 					color.White)
+			}
+		} else {
+			for i1 := i; i1 < i+4; i1++ {
+				ebitenutil.DrawLine(screen,
+					(g.p[g.planes[i1][0]].x/(g.p[g.planes[i1][0]].z+1500))*-900+float64(screenWidth/2),
+					(g.p[g.planes[i1][0]].y/(g.p[g.planes[i1][0]].z+1500))*-900+float64(screenHeight/2),
+					(g.p[g.planes[i1][1]].x/(g.p[g.planes[i1][1]].z+1500))*-900+float64(screenWidth/2),
+					(g.p[g.planes[i1][1]].y/(g.p[g.planes[i1][1]].z+1500))*-900+float64(screenHeight/2),
+					color.RGBA{0xff, 0xff, 0xff, 28})
+
 			}
 		}
 	}
