@@ -127,13 +127,6 @@ func (c *Cube) Rotate(screen *ebiten.Image, r Rotator) {
 }
 
 func (c *Cube) Draw(screen *ebiten.Image, clr color.Color) {
-
-	// da, db stands for diagonal a and b(diagonal starting and ending points)
-	DrawNormal := func(da, db, v, w Vec, col color.Color) {
-		ctr := Add(Divide(Sub(da, db), 2), db)
-		DrawLine(screen, ctr, Add(Multiply(Normalize(Cross(v, w)), 200), ctr), col)
-	}
-
 	for _, f := range [][]int{
 		{0, 1, 2, 3}, // Near
 		{7, 6, 5, 4}, // Far
@@ -142,8 +135,11 @@ func (c *Cube) Draw(screen *ebiten.Image, clr color.Color) {
 		{3, 2, 6, 7}, // Right
 		{4, 0, 3, 7}, // Bottom
 	} {
-		DrawNormal(c.p[f[2]], c.p[f[0]], Sub(c.p[f[1]], c.p[f[2]]), Sub(c.p[f[2]], c.p[f[3]]), color.RGBA{255, 0, 0, 255})
-		if cr := Cross(Sub(c.p[f[1]], c.p[f[2]]), Sub(c.p[f[2]], c.p[f[3]])); Dot(Vec{0, 0, 1}, cr) < 0 {
+		ctr := Add(Divide(Sub(c.p[f[2]], c.p[f[0]]), 2), c.p[f[0]])
+		v, w := Sub(c.p[f[1]], c.p[f[2]]), Sub(c.p[f[2]], c.p[f[3]])
+		cr := Cross(v, w)
+		DrawLine(screen, ctr, Add(Multiply(Normalize(cr), 200), ctr), color.RGBA{255, 0, 0, 255})
+		if Dot(ctr, cr) < 0 {
 			DrawLine(screen, c.p[f[0]], c.p[f[1]], clr)
 			DrawLine(screen, c.p[f[1]], c.p[f[2]], clr)
 			DrawLine(screen, c.p[f[2]], c.p[f[3]], clr)
