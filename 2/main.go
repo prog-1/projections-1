@@ -49,24 +49,31 @@ func (g *Game) Update() error {
 	return nil
 }
 
+func (g *Game) DrawLine(screen *ebiten.Image, a, b Point) {
+	z1 := a.z + 500
+	z2 := b.z + 500
+	x1 := a.x / z1
+	y1 := a.y / z1
+	x2 := b.x / z2
+	y2 := b.y / z2
+	ebitenutil.DrawLine(screen, x1*500+float64(g.width)/2, y1*500+float64(g.height)/2, x2*500+float64(g.width)/2, y2*500+float64(g.height)/2, color.White)
+}
+
 func (g *Game) Draw(screen *ebiten.Image) {
-	c := color.White
-	w, h := g.width/2, g.height/2
-	ebitenutil.DrawLine(screen, g.dots[0].x+float64(w), g.dots[0].y+float64(h), g.dots[1].x+float64(w), g.dots[1].y+float64(h), c)
-	ebitenutil.DrawLine(screen, g.dots[1].x+float64(w), g.dots[1].y+float64(h), g.dots[2].x+float64(w), g.dots[2].y+float64(h), c)
-	ebitenutil.DrawLine(screen, g.dots[2].x+float64(w), g.dots[2].y+float64(h), g.dots[3].x+float64(w), g.dots[3].y+float64(h), c)
-	ebitenutil.DrawLine(screen, g.dots[3].x+float64(w), g.dots[3].y+float64(h), g.dots[0].x+float64(w), g.dots[0].y+float64(h), c)
+	g.DrawLine(screen, g.dots[0], g.dots[1])
+	g.DrawLine(screen, g.dots[1], g.dots[2])
+	g.DrawLine(screen, g.dots[2], g.dots[3])
+	g.DrawLine(screen, g.dots[3], g.dots[0])
 
-	ebitenutil.DrawLine(screen, g.dots[4].x+float64(w), g.dots[4].y+float64(h), g.dots[5].x+float64(w), g.dots[5].y+float64(h), c)
-	ebitenutil.DrawLine(screen, g.dots[5].x+float64(w), g.dots[5].y+float64(h), g.dots[6].x+float64(w), g.dots[6].y+float64(h), c)
-	ebitenutil.DrawLine(screen, g.dots[6].x+float64(w), g.dots[6].y+float64(h), g.dots[7].x+float64(w), g.dots[7].y+float64(h), c)
-	ebitenutil.DrawLine(screen, g.dots[7].x+float64(w), g.dots[7].y+float64(h), g.dots[4].x+float64(w), g.dots[4].y+float64(h), c)
+	g.DrawLine(screen, g.dots[4], g.dots[5])
+	g.DrawLine(screen, g.dots[5], g.dots[6])
+	g.DrawLine(screen, g.dots[6], g.dots[7])
+	g.DrawLine(screen, g.dots[7], g.dots[4])
 
-	ebitenutil.DrawLine(screen, g.dots[0].x+float64(w), g.dots[0].y+float64(h), g.dots[4].x+float64(w), g.dots[4].y+float64(h), c)
-	ebitenutil.DrawLine(screen, g.dots[1].x+float64(w), g.dots[1].y+float64(h), g.dots[5].x+float64(w), g.dots[5].y+float64(h), c)
-	ebitenutil.DrawLine(screen, g.dots[2].x+float64(w), g.dots[2].y+float64(h), g.dots[6].x+float64(w), g.dots[6].y+float64(h), c)
-	ebitenutil.DrawLine(screen, g.dots[3].x+float64(w), g.dots[3].y+float64(h), g.dots[7].x+float64(w), g.dots[7].y+float64(h), c)
-
+	g.DrawLine(screen, g.dots[0], g.dots[4])
+	g.DrawLine(screen, g.dots[1], g.dots[5])
+	g.DrawLine(screen, g.dots[2], g.dots[6])
+	g.DrawLine(screen, g.dots[3], g.dots[7])
 }
 
 func NewGame(width, height int) *Game {
