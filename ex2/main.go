@@ -60,9 +60,6 @@ func Cross(a, b point) point {
 func Dot(a, b point) float64 {
 	return a.x*b.x + a.y*b.y + a.z*b.z
 }
-func Multiply(v point, a float64) point {
-	return point{v.x * a, v.y * a, v.z * a}
-}
 
 func (g *game) Layout(outWidth, outHeight int) (w, h int) { return screenWidth, screenHeight }
 
@@ -74,7 +71,6 @@ func (g *game) Update() error {
 }
 
 func (g *game) Draw(screen *ebiten.Image) {
-
 	for i := 0; i < len(g.planes); i += 4 {
 		a := point{
 			g.p[g.planes[i][1]].x - g.p[g.planes[i][0]].x,
