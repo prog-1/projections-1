@@ -134,58 +134,21 @@ func (c *Cube) Draw(screen *ebiten.Image, clr color.Color) {
 		DrawLine(screen, ctr, Add(Multiply(Normalize(Cross(v, w)), 200), ctr), col)
 	}
 
-	// Near plane
-	DrawNormal(c.p[2], c.p[0], Sub(c.p[1], c.p[2]), Sub(c.p[2], c.p[3]), color.RGBA{255, 0, 0, 255})
-	if cr := Cross(Sub(c.p[1], c.p[2]), Sub(c.p[2], c.p[3])); Dot(Vec{0, 0, 1}, cr) < 0 {
-		DrawLine(screen, c.p[0], c.p[1], clr)
-		DrawLine(screen, c.p[1], c.p[2], clr)
-		DrawLine(screen, c.p[2], c.p[3], clr)
-		DrawLine(screen, c.p[3], c.p[0], clr)
-	}
-
-	// Far plane
-	DrawNormal(c.p[5], c.p[7], Sub(c.p[6], c.p[5]), Sub(c.p[5], c.p[4]), color.RGBA{0, 255, 0, 255})
-	if cr := Cross(Sub(c.p[6], c.p[5]), Sub(c.p[5], c.p[4])); Dot(Vec{0, 0, 1}, cr) < 0 {
-		DrawLine(screen, c.p[4], c.p[5], clr)
-		DrawLine(screen, c.p[5], c.p[6], clr)
-		DrawLine(screen, c.p[6], c.p[7], clr)
-		DrawLine(screen, c.p[7], c.p[4], clr)
-	}
-
-	//Left plane
-	DrawNormal(c.p[0], c.p[5], Sub(c.p[5], c.p[1]), Sub(c.p[1], c.p[0]), color.RGBA{0, 255, 255, 255})
-	if cr := Cross(Sub(c.p[5], c.p[1]), Sub(c.p[1], c.p[0])); Dot(Vec{0, 0, 1}, cr) < 0 {
-		DrawLine(screen, c.p[4], c.p[5], clr)
-		DrawLine(screen, c.p[5], c.p[1], clr)
-		DrawLine(screen, c.p[1], c.p[0], clr)
-		DrawLine(screen, c.p[0], c.p[4], clr)
-	}
-
-	// Top plane
-	DrawNormal(c.p[6], c.p[1], Sub(c.p[5], c.p[6]), Sub(c.p[6], c.p[2]), color.RGBA{255, 0, 255, 255})
-	if cr := Cross(Sub(c.p[5], c.p[6]), Sub(c.p[6], c.p[2])); Dot(Vec{0, 0, 1}, cr) < 0 {
-		DrawLine(screen, c.p[1], c.p[5], clr)
-		DrawLine(screen, c.p[5], c.p[6], clr)
-		DrawLine(screen, c.p[6], c.p[2], clr)
-		DrawLine(screen, c.p[2], c.p[1], clr)
-	}
-
-	// Right plane
-	DrawNormal(c.p[6], c.p[3], Sub(c.p[2], c.p[6]), Sub(c.p[6], c.p[7]), color.White)
-	if cr := Cross(Sub(c.p[2], c.p[6]), Sub(c.p[6], c.p[7])); Dot(Vec{0, 0, 1}, cr) < 0 {
-		DrawLine(screen, c.p[3], c.p[2], clr)
-		DrawLine(screen, c.p[2], c.p[6], clr)
-		DrawLine(screen, c.p[6], c.p[7], clr)
-		DrawLine(screen, c.p[7], c.p[3], clr)
-	}
-
-	// Bottom plane
-	DrawNormal(c.p[0], c.p[7], Sub(c.p[0], c.p[3]), Sub(c.p[3], c.p[7]), color.RGBA{255, 165, 0, 255})
-	if cr := Cross(Sub(c.p[0], c.p[3]), Sub(c.p[3], c.p[7])); Dot(Vec{0, 0, 1}, cr) < 0 {
-		DrawLine(screen, c.p[4], c.p[0], clr)
-		DrawLine(screen, c.p[0], c.p[3], clr)
-		DrawLine(screen, c.p[3], c.p[7], clr)
-		DrawLine(screen, c.p[4], c.p[4], clr)
+	for _, f := range [][]int{
+		{0, 1, 2, 3}, // Near
+		{7, 6, 5, 4}, // Far
+		{4, 5, 1, 0}, // Left
+		{1, 5, 6, 2}, // Top
+		{3, 2, 6, 7}, // Right
+		{4, 0, 3, 7}, // Bottom
+	} {
+		DrawNormal(c.p[f[2]], c.p[f[0]], Sub(c.p[f[1]], c.p[f[2]]), Sub(c.p[f[2]], c.p[f[3]]), color.RGBA{255, 0, 0, 255})
+		if cr := Cross(Sub(c.p[f[1]], c.p[f[2]]), Sub(c.p[f[2]], c.p[f[3]])); Dot(Vec{0, 0, 1}, cr) < 0 {
+			DrawLine(screen, c.p[f[0]], c.p[f[1]], clr)
+			DrawLine(screen, c.p[f[1]], c.p[f[2]], clr)
+			DrawLine(screen, c.p[f[2]], c.p[f[3]], clr)
+			DrawLine(screen, c.p[f[3]], c.p[f[0]], clr)
+		}
 	}
 }
 
@@ -199,15 +162,15 @@ func NewGame() *game {
 		[]Cube{
 			{
 				[8]Vec{
-					{-200, -200, 200}, // NearBottomLeft
-					{-200, 200, 200},  // NearTopLeft
-					{200, 200, 200},   // NearTopRight
-					{200, -200, 200},  // NearBottomRight
+					{-200, -200, 400}, // NearBottomLeft
+					{-200, 200, 400},  // NearTopLeft
+					{200, 200, 400},   // NearTopRight
+					{200, -200, 400},  // NearBottomRight
 
-					{-200, -200, 600}, // FarBottomLeft
-					{-200, 200, 600},  // FarTopLeft
-					{200, 200, 600},   // FarTopRight
-					{200, -200, 600},  // FarBottomRight
+					{-200, -200, 800}, // FarBottomLeft
+					{-200, 200, 800},  // FarTopLeft
+					{200, 200, 800},   // FarTopRight
+					{200, -200, 800},  // FarBottomRight
 				},
 			},
 		},
@@ -232,6 +195,10 @@ func (g *game) Draw(screen *ebiten.Image) {
 func main() {
 	ebiten.SetWindowSize(screenWidth, screenHeight)
 	g := NewGame()
+
+	for i := range g.c {
+		g.c[i].Rotate(g.screenBuffer, Rotator{0, math.Pi, 0})
+	}
 
 	if err := ebiten.RunGame(g); err != nil {
 		log.Fatal(err)
