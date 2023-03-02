@@ -24,7 +24,6 @@ type Game struct {
 	cube      [8]point // cube points
 	faces     [][4]int //slice of cube faces
 	faceEdges [][2]int //edge sequence for each face
-	edges     [][2]int
 }
 
 type point struct {
@@ -38,7 +37,7 @@ type rotator struct {
 //---------------------------Update-------------------------------------
 
 func (g *Game) Update() error {
-	//all logic on update
+	//cube point rotation
 	for i := range g.cube {
 		g.cube[i].rotate(g.r, g.cp)
 	}
@@ -53,33 +52,20 @@ func (g *Game) Draw(screen *ebiten.Image) {
 
 		u := sub(g.cube[g.faces[i][0]], g.cube[g.faces[i][1]])
 		v := sub(g.cube[g.faces[i][2]], g.cube[g.faces[i][1]])
-
 		n := crossProduct(u, v)
 
-		if dotProduct(g.cp, n) < 0 {
-			// for j := range g.faceEdges {
-			// 	g.drawLine(screen, g.cube[g.faces[i][g.faceEdges[j][0]]], g.cube[g.faces[i][g.faceEdges[j][1]]])
-			// }
-			g.drawLine(screen, g.cube[g.faces[i][0]], g.cube[g.faces[i][1]])
-			g.drawLine(screen, g.cube[g.faces[i][1]], g.cube[g.faces[i][2]])
-			g.drawLine(screen, g.cube[g.faces[i][2]], g.cube[g.faces[i][3]])
-			g.drawLine(screen, g.cube[g.faces[i][3]], g.cube[g.faces[i][0]])
+		if dotProduct(normalize(g.cp), n) < 0 { //n.z
+			for j := range g.faceEdges {
+				g.drawLine(screen, g.cube[g.faces[i][g.faceEdges[j][0]]], g.cube[g.faces[i][g.faceEdges[j][1]]])
+			}
 		}
-
 	}
+
+	g.drawMP(screen, g.cube[0], g.cube[2]) //used for debug
 
 	// //default drawing
 	// for i := range g.edges {
 	// 	g.drawLine(screen, g.cube[g.edges[i][0]], g.cube[g.edges[i][1]])
-	// }
-
-	// u := sub(g.cube[1], g.cube[0])
-	// v := sub(g.cube[3], g.cube[0])
-	// n := crossProduct(u, v)
-	// if n.z >= 0 {
-	// 	fmt.Println("+")
-	// } else {
-	// 	fmt.Println("-")
 	// }
 }
 
@@ -101,18 +87,17 @@ func (g *Game) drawMP(screen *ebiten.Image, a, b point) {
 	ebitenutil.DrawCircle(screen, mp.x+g.cp.x, mp.y+g.cp.y, 2, color.White)
 }
 
-// func (g *Game) normal(screen *ebiten.Image, a, b, d point) point {
-// 	u := sub(b, a)
-// 	v := sub(d, a)
-// 	n := crossProduct(u, v)
-// 	//mp := mp(b, d)
-// 	//g.drawLine(screen, mp, n)
-
-// 	//fmt.Println(n)
-// 	return n
-// }
-
 //-------------------------Functions----------------------------------
+
+func normalize(a point) (res point) {
+	length := math.Sqrt(a.x*a.x + a.y*a.y + a.z*a.z)
+
+	res.x = a.x / length
+	res.y = a.y / length
+	res.z = a.z / length
+
+	return res
+}
 
 //from b subtract a
 func sub(b, a point) (res point) {
@@ -213,38 +198,22 @@ func NewGame(width, height int) *Game {
 		/*h*/ {-100, 100, 100},
 	}
 
-	// //edges
-	edges := [][2]int{
-		/*1st plane*/ {0, 1}, {1, 2}, {2, 3}, {3, 0},
-		/*2st plane*/ {4, 5}, {5, 6}, {6, 7}, {7, 4},
-		/*connectors*/ {0, 4}, {1, 5}, {3, 7}, {2, 6},
-	}
 	faceEdges := [][2]int{
 		{0, 1}, {1, 2}, {2, 3}, {3, 0},
 	}
 
-	// //cube faces
-	// faces := [6][4][2]int{ //6 faces with 4 lines with 2 points
-	// 	/*front face*/ {{0, 1}, {1, 2}, {2, 3}, {3, 0}},
-	// 	/*rear face*/ {{4, 5}, {5, 6}, {6, 7}, {7, 4}},
-	// 	/*top face*/ {{3, 2}, {2, 5}, {5, 4}, {4, 3}},
-	// 	/*bottom face*/ {{0, 1}, {1, 6}, {6, 7}, {7, 0}},
-	// 	/*left face*/ {{0, 3}, {3, 4}, {4, 7}, {7, 0}},
-	// 	/*right face*/ {{1, 2}, {2, 5}, {5, 6}, {6, 1}},
-	// }
-
 	faces := [][4]int{
 		/*front face*/ {0, 1, 2, 3},
-		/*rear face*/ {4, 5, 6, 7},
-		/*top face*/ {0, 1, 5, 4},
-		/*bottom face*/ {2, 6, 7, 3},
-		/*left face*/ {0, 3, 7, 4},
-		/*right face*/ {1, 2, 6, 5},
+		/*rear face*/ {5, 4, 7, 6},
+		/*top face*/ {4, 5, 1, 0},
+		/*bottom face*/ {3, 2, 6, 7},
+		/*left face*/ {4, 0, 3, 7},
+		/*right face*/ {1, 5, 6, 2},
 	}
 
 	//rotator
 	var r rotator //rotation angle for each axis
-	r.x, r.y, r.z = 0, math.Pi/360, 0
+	r.x, r.y, r.z = math.Pi/200, math.Pi/200, math.Pi/200
 
-	return &Game{width: width, height: height, r: r, cp: cp, cube: cube, faces: faces, faceEdges: faceEdges, edges: edges}
+	return &Game{width: width, height: height, r: r, cp: cp, cube: cube, faces: faces, faceEdges: faceEdges}
 }
