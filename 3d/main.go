@@ -48,10 +48,18 @@ func (c *cube) RotateZ(angle float64) {
 	}
 }
 
+func Dot(a, b Point) float64 {
+	return a.x*b.x + a.y*b.y + a.z*b.z
+}
+
+func Sub(a, b Point) Point {
+	return Point{a.x - b.x, a.y - b.y, a.z - b.z}
+}
+
 func (c *cube) Draw(screen *ebiten.Image) {
 	for _, v := range c.Joints {
-		a := crossProduct(c.Points[v[0]], c.Points[v[1]])
-		if a.z > 0 {
+		a := crossProduct(Sub(c.Points[v[1]], c.Points[v[0]]), Sub(c.Points[v[1]], c.Points[v[2]]))
+		if Dot(Point{0, 0, 1}, a) > 0 {
 			continue
 		}
 		for i := 1; i <= 3; i++ {
