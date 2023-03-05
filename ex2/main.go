@@ -90,19 +90,45 @@ func (g *Game) Update() error {
 }
 
 func (g *Game) Draw(screen *ebiten.Image) {
-	a, b := float64(200), float64(200)
-	ebitenutil.DrawLine(screen, g.pos1.x+a, g.pos1.y+b, g.pos2.x+a, g.pos2.y+b, color.RGBA{R: 227, G: 76, B: 235, A: 255})
-	ebitenutil.DrawLine(screen, g.pos2.x+a, g.pos2.y+b, g.pos3.x+a, g.pos3.y+b, color.RGBA{R: 227, G: 76, B: 235, A: 255})
-	ebitenutil.DrawLine(screen, g.pos3.x+a, g.pos3.y+b, g.pos4.x+a, g.pos4.y+b, color.RGBA{R: 227, G: 76, B: 235, A: 255})
-	ebitenutil.DrawLine(screen, g.pos4.x+a, g.pos4.y+b, g.pos1.x+a, g.pos1.y+b, color.RGBA{R: 227, G: 76, B: 235, A: 255})
-	ebitenutil.DrawLine(screen, g.pos5.x+a, g.pos5.y+b, g.pos6.x+a, g.pos6.y+b, color.RGBA{R: 227, G: 76, B: 235, A: 255})
-	ebitenutil.DrawLine(screen, g.pos6.x+a, g.pos6.y+b, g.pos8.x+a, g.pos8.y+b, color.RGBA{R: 227, G: 76, B: 235, A: 255})
-	ebitenutil.DrawLine(screen, g.pos8.x+a, g.pos8.y+b, g.pos7.x+a, g.pos7.y+b, color.RGBA{R: 227, G: 76, B: 235, A: 255})
-	ebitenutil.DrawLine(screen, g.pos7.x+a, g.pos7.y+b, g.pos5.x+a, g.pos5.y+b, color.RGBA{R: 227, G: 76, B: 235, A: 255})
-	ebitenutil.DrawLine(screen, g.pos1.x+a, g.pos1.y+b, g.pos5.x+a, g.pos5.y+b, color.RGBA{R: 227, G: 76, B: 235, A: 255})
-	ebitenutil.DrawLine(screen, g.pos2.x+a, g.pos2.y+b, g.pos6.x+a, g.pos6.y+b, color.RGBA{R: 227, G: 76, B: 235, A: 255})
-	ebitenutil.DrawLine(screen, g.pos3.x+a, g.pos3.y+b, g.pos8.x+a, g.pos8.y+b, color.RGBA{R: 227, G: 76, B: 235, A: 255})
-	ebitenutil.DrawLine(screen, g.pos4.x+a, g.pos4.y+b, g.pos7.x+a, g.pos7.y+b, color.RGBA{R: 227, G: 76, B: 235, A: 255})
+	a, b := screenWidth, screenHeight
+	ebitenutil.DrawLine(screen,
+		(g.pos1.x/(g.pos1.z+1000))*-900+float64(a/2), (g.pos1.y/(g.pos1.z+1000))*-900+float64(b/2),
+		(g.pos2.x/(g.pos2.z+1000))*-900+float64(a/2), (g.pos2.y/(g.pos2.z+1000))*-900+float64(b/2), color.RGBA{R: 227, G: 76, B: 235, A: 255})
+	ebitenutil.DrawLine(screen,
+		(g.pos2.x/(g.pos2.z+1000))*-900+float64(a/2), (g.pos2.y/(g.pos2.z+1000))*-900+float64(b/2),
+		(g.pos3.x/(g.pos3.z+1000))*-900+float64(a/2), (g.pos3.y/(g.pos3.z+1000))*-900+float64(b/2), color.RGBA{R: 227, G: 76, B: 235, A: 255})
+	ebitenutil.DrawLine(screen,
+		(g.pos3.x/(g.pos3.z+1000))*-900+float64(a/2), (g.pos3.y/(g.pos3.z+1000))*-900+float64(b/2),
+		(g.pos4.x/(g.pos4.z+1000))*-900+float64(a/2), (g.pos4.y/(g.pos4.z+1000))*-900+float64(b/2), color.RGBA{R: 227, G: 76, B: 235, A: 255})
+	ebitenutil.DrawLine(screen,
+		(g.pos4.x/(g.pos4.z+1000))*-900+float64(a/2), (g.pos4.y/(g.pos4.z+1000))*-900+float64(b/2),
+		(g.pos1.x/(g.pos1.z+1000))*-900+float64(a/2), (g.pos1.y/(g.pos1.z+1000))*-900+float64(b/2), color.RGBA{R: 227, G: 76, B: 235, A: 255})
+
+	ebitenutil.DrawLine(screen,
+		(g.pos5.x/(g.pos5.z+1000))*-900+float64(a/2), (g.pos5.y/(g.pos5.z+1000))*-900+float64(b/2),
+		(g.pos6.x/(g.pos6.z+1000))*-900+float64(a/2), (g.pos6.y/(g.pos6.z+1000))*-900+float64(b/2), color.RGBA{R: 227, G: 76, B: 235, A: 255})
+	ebitenutil.DrawLine(screen,
+		(g.pos6.x/(g.pos6.z+1000))*-900+float64(a/2), (g.pos6.y/(g.pos6.z+1000))*-900+float64(b/2),
+		(g.pos8.x/(g.pos8.z+1000))*-900+float64(a/2), (g.pos8.y/(g.pos8.z+1000))*-900+float64(b/2), color.RGBA{R: 227, G: 76, B: 235, A: 255})
+	ebitenutil.DrawLine(screen,
+		(g.pos8.x/(g.pos8.z+1000))*-900+float64(a/2), (g.pos8.y/(g.pos8.z+1000))*-900+float64(b/2),
+		(g.pos7.x/(g.pos7.z+1000))*-900+float64(a/2), (g.pos7.y/(g.pos7.z+1000))*-900+float64(b/2), color.RGBA{R: 227, G: 76, B: 235, A: 255})
+	ebitenutil.DrawLine(screen,
+		(g.pos7.x/(g.pos7.z+1000))*-900+float64(a/2), (g.pos7.y/(g.pos7.z+1000))*-900+float64(b/2),
+		(g.pos5.x/(g.pos5.z+1000))*-900+float64(a/2), (g.pos5.y/(g.pos5.z+1000))*-900+float64(b/2), color.RGBA{R: 227, G: 76, B: 235, A: 255})
+
+	ebitenutil.DrawLine(screen,
+		(g.pos1.x/(g.pos1.z+1000))*-900+float64(a/2), (g.pos1.y/(g.pos1.z+1000))*-900+float64(b/2),
+		(g.pos5.x/(g.pos5.z+1000))*-900+float64(a/2), (g.pos5.y/(g.pos5.z+1000))*-900+float64(b/2), color.RGBA{R: 227, G: 76, B: 235, A: 255})
+	ebitenutil.DrawLine(screen,
+		(g.pos2.x/(g.pos2.z+1000))*-900+float64(a/2), (g.pos2.y/(g.pos2.z+1000))*-900+float64(b/2),
+		(g.pos6.x/(g.pos6.z+1000))*-900+float64(a/2), (g.pos6.y/(g.pos6.z+1000))*-900+float64(b/2), color.RGBA{R: 227, G: 76, B: 235, A: 255})
+	ebitenutil.DrawLine(screen,
+		(g.pos3.x/(g.pos3.z+1000))*-900+float64(a/2), (g.pos3.y/(g.pos3.z+1000))*-900+float64(b/2),
+		(g.pos8.x/(g.pos8.z+1000))*-900+float64(a/2), (g.pos8.y/(g.pos8.z+1000))*-900+float64(b/2), color.RGBA{R: 227, G: 76, B: 235, A: 255})
+	ebitenutil.DrawLine(screen,
+		(g.pos4.x/(g.pos4.z+1000))*-900+float64(a/2), (g.pos4.y/(g.pos4.z+1000))*-900+float64(b/2),
+		(g.pos7.x/(g.pos7.z+1000))*-900+float64(a/2), (g.pos7.y/(g.pos7.z+1000))*-900+float64(b/2), color.RGBA{R: 227, G: 76, B: 235, A: 255})
 }
 
 func (g *Game) Layout(int, int) (int, int) {
