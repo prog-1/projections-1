@@ -28,24 +28,44 @@ type (
 	}
 )
 
+func Add(a, b point) point {
+	return point{a.x + b.x, a.y + b.y, a.z + b.z}
+}
+
+func Sub(a, b point) point {
+	return point{a.x - b.x, a.y - b.y, a.z - b.z}
+}
+
+func Divide(v point, a float64) point {
+	return point{v.x / a, v.y / a, v.z / a}
+}
+
+func Multiply(v point, a float64) point {
+	return point{v.x * a, v.y * a, v.z * a}
+}
+
+func Mod(a point) float64 {
+	return math.Sqrt(a.x*a.x + a.y*a.y + a.z*a.z)
+}
+
 func (g *game) rotateX() {
 	for i, v := range g.p {
-		g.p[i].x = v.x*math.Cos(0.0025) - v.y*math.Sin(0.0025)
-		g.p[i].y = v.x*math.Sin(0.0025) + v.y*math.Cos(0.0025)
+		g.p[i].x = v.x*math.Cos(0.0025*5) - v.y*math.Sin(0.0025*5)
+		g.p[i].y = v.x*math.Sin(0.0025*5) + v.y*math.Cos(0.0025*5)
 	}
 }
 
 func (g *game) rotateY() {
 	for i, v := range g.p {
-		g.p[i].x = v.x*math.Cos(0.00474533) - v.z*math.Sin(0.00474533)
-		g.p[i].z = v.x*math.Sin(0.00474533) + v.z*math.Cos(0.00474533)
+		g.p[i].x = v.x*math.Cos(0.00474533*5) - v.z*math.Sin(0.00474533*5)
+		g.p[i].z = v.x*math.Sin(0.00474533*5) + v.z*math.Cos(0.00474533*5)
 	}
 
 }
 func (g *game) rotateZ() {
 	for i, v := range g.p {
-		g.p[i].y = v.y*math.Cos(-0.00474533) - v.z*math.Sin(-0.00474533)
-		g.p[i].z = v.y*math.Sin(-0.00474533) + v.z*math.Cos(-0.00474533)
+		g.p[i].y = v.y*math.Cos(-0.00474533*5) - v.z*math.Sin(-0.00474533*5)
+		g.p[i].z = v.y*math.Sin(-0.00474533*5) + v.z*math.Cos(-0.00474533*5)
 	}
 
 }
@@ -70,47 +90,15 @@ func (g *game) Update() error {
 	return nil
 }
 
-// func Add(a, b point) point {
-// 	return point{a.x + b.x, a.y + b.y, a.z + b.z}
-// }
-
-// func Sub(a, b point) point {
-// 	return point{a.x - b.x, a.y - b.y, a.z - b.z}
-// }
-
-// func Divide(v point, a float64) point {
-// 	return point{v.x / a, v.y / a, v.z / a}
-// }
-
-// func Multiply(v point, a float64) point {
-// 	return point{v.x * a, v.y * a, v.z * a}
-// }
-
-// func Mod(a point) float64 {
-// 	return math.Sqrt(a.x*a.x + a.y*a.y + a.z*a.z)
-// }
-
 func (g *game) Draw(screen *ebiten.Image) {
 	for i := 0; i < len(g.planes); i += 4 {
-		a := point{
-			g.p[g.planes[i][1]].x - g.p[g.planes[i][0]].x,
-			g.p[g.planes[i][1]].y - g.p[g.planes[i][0]].y,
-			g.p[g.planes[i][1]].z - g.p[g.planes[i][0]].z,
-		}
-
-		b := point{
-			g.p[g.planes[i+1][1]].x - g.p[g.planes[i+1][0]].x,
-			g.p[g.planes[i+1][1]].y - g.p[g.planes[i+1][0]].y,
-			g.p[g.planes[i+1][1]].z - g.p[g.planes[i+1][0]].z,
-		}
-		center := point{
-			x: (g.p[g.planes[i+1][1]].x + g.p[g.planes[i][0]].x) / 2,
-			y: (g.p[g.planes[i+1][1]].y + g.p[g.planes[i][0]].y) / 2,
-			z: (g.p[g.planes[i+1][1]].z + g.p[g.planes[i][0]].z) / 2,
-		}
+		a := Sub(g.p[g.planes[i][1]], g.p[g.planes[i][0]])
+		b := Sub(g.p[g.planes[i+1][1]], g.p[g.planes[i+1][0]])
+		center := Divide(Add(g.p[g.planes[i+1][1]], g.p[g.planes[i][0]]), 2)
 		screen.Set(int(center.x)+screenWidth/2, int(center.y)+screenHeight/2, c)
 		cross := Cross(a, b)
-		if Dot(center, cross) < 0 {
+		p := point{float64(screenWidth / 2), float64(screenHeight / 2), 0}
+		if Dot(cross, Add(Divide(center, center.z), p)) < 0 {
 			for i1 := i; i1 < i+4; i1++ {
 				ebitenutil.DrawLine(screen,
 					(g.p[g.planes[i1][0]].x/(g.p[g.planes[i1][0]].z+1500))*-900+float64(screenWidth/2),
