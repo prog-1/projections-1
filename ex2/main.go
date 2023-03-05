@@ -70,6 +70,26 @@ func (g *game) Update() error {
 	return nil
 }
 
+// func Add(a, b point) point {
+// 	return point{a.x + b.x, a.y + b.y, a.z + b.z}
+// }
+
+// func Sub(a, b point) point {
+// 	return point{a.x - b.x, a.y - b.y, a.z - b.z}
+// }
+
+// func Divide(v point, a float64) point {
+// 	return point{v.x / a, v.y / a, v.z / a}
+// }
+
+// func Multiply(v point, a float64) point {
+// 	return point{v.x * a, v.y * a, v.z * a}
+// }
+
+// func Mod(a point) float64 {
+// 	return math.Sqrt(a.x*a.x + a.y*a.y + a.z*a.z)
+// }
+
 func (g *game) Draw(screen *ebiten.Image) {
 	for i := 0; i < len(g.planes); i += 4 {
 		a := point{
@@ -83,8 +103,14 @@ func (g *game) Draw(screen *ebiten.Image) {
 			g.p[g.planes[i+1][1]].y - g.p[g.planes[i+1][0]].y,
 			g.p[g.planes[i+1][1]].x - g.p[g.planes[i+1][0]].z,
 		}
+		center := point{
+			x: (g.p[g.planes[i+1][1]].x + g.p[g.planes[i][0]].x) / 2,
+			y: (g.p[g.planes[i+1][1]].y + g.p[g.planes[i][0]].y) / 2,
+			z: (g.p[g.planes[i+1][1]].x + g.p[g.planes[i][0]].z) / 2,
+		}
+		screen.Set(int(center.x)+screenWidth/2, int(center.y)+screenHeight/2, c)
 		cross := Cross(a, b)
-		if Dot(point{0, 0, 1}, cross) < 0 {
+		if Dot(center, cross) < 0 {
 			for i1 := i; i1 < i+4; i1++ {
 				ebitenutil.DrawLine(screen,
 					(g.p[g.planes[i1][0]].x/(g.p[g.planes[i1][0]].z+1500))*-900+float64(screenWidth/2),
