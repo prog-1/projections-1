@@ -95,18 +95,18 @@ func (g *game) Draw(screen *ebiten.Image) {
 		a := point{
 			g.p[g.planes[i][1]].x - g.p[g.planes[i][0]].x,
 			g.p[g.planes[i][1]].y - g.p[g.planes[i][0]].y,
-			g.p[g.planes[i][1]].x - g.p[g.planes[i][0]].z,
+			g.p[g.planes[i][1]].z - g.p[g.planes[i][0]].z,
 		}
 
 		b := point{
 			g.p[g.planes[i+1][1]].x - g.p[g.planes[i+1][0]].x,
 			g.p[g.planes[i+1][1]].y - g.p[g.planes[i+1][0]].y,
-			g.p[g.planes[i+1][1]].x - g.p[g.planes[i+1][0]].z,
+			g.p[g.planes[i+1][1]].z - g.p[g.planes[i+1][0]].z,
 		}
 		center := point{
 			x: (g.p[g.planes[i+1][1]].x + g.p[g.planes[i][0]].x) / 2,
 			y: (g.p[g.planes[i+1][1]].y + g.p[g.planes[i][0]].y) / 2,
-			z: (g.p[g.planes[i+1][1]].x + g.p[g.planes[i][0]].z) / 2,
+			z: (g.p[g.planes[i+1][1]].z + g.p[g.planes[i][0]].z) / 2,
 		}
 		screen.Set(int(center.x)+screenWidth/2, int(center.y)+screenHeight/2, c)
 		cross := Cross(a, b)
