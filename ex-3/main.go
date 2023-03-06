@@ -23,7 +23,6 @@ type Point struct {
 type Game struct {
 	width, height int
 	verts         []*Point
-	edges         [][2]int
 	planes        [][4]int
 }
 
@@ -52,11 +51,6 @@ func NewGame(width, height int) *Game {
 			{-100, -100, -100},
 			{-100, 100, -100},
 		},
-		edges: [][2]int{
-			{0, 1}, {1, 2}, {2, 3}, {3, 0},
-			{4, 5}, {5, 6}, {6, 7}, {7, 4},
-			{0, 4}, {1, 5}, {2, 6}, {3, 7},
-		},
 		planes: [][4]int{
 			{0, 1, 2, 3}, {7, 6, 5, 4}, {2, 6, 7, 3}, {3, 7, 4, 0}, {1, 0, 4, 5}, {6, 2, 1, 5},
 		},
@@ -82,6 +76,10 @@ func Sub(a, b *Point) *Point {
 	return &Point{x: a.x - b.x, y: a.y - b.y, z: a.z - b.z}
 }
 
+func Dot(a, b *Point) float64 {
+	return a.x*b.x + a.y*b.y + a.z*b.z
+}
+
 func (g *Game) DrawLine(img *ebiten.Image, a, b *Point) {
 	z1 := a.z + 500
 	z2 := b.z + 500
@@ -95,7 +93,7 @@ func (g *Game) DrawLine(img *ebiten.Image, a, b *Point) {
 func (g *Game) Draw(screen *ebiten.Image) {
 	for _, v := range g.planes {
 		normal := Cross(Sub(g.verts[v[3]], g.verts[v[0]]), Sub(g.verts[v[1]], g.verts[v[0]]))
-		if normal.z < 0 {
+		if Dot(normal, Sub(g.verts[v[0]], &Point{0, 0, -500})) < 0 {
 			g.DrawLine(screen, g.verts[v[0]], g.verts[v[1]])
 			g.DrawLine(screen, g.verts[v[1]], g.verts[v[2]])
 			g.DrawLine(screen, g.verts[v[2]], g.verts[v[3]])
