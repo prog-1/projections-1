@@ -84,40 +84,64 @@ func Dot(a, b point) float64 {
 func (g *game) Layout(outWidth, outHeight int) (w, h int) { return screenWidth, screenHeight }
 
 func (g *game) Update() error {
-	g.rotateX()
-	g.rotateY()
-	g.rotateZ()
+	// g.rotateX()
+	// g.rotateY()
+	// g.rotateZ()
+	if ebiten.IsKeyPressed(ebiten.KeyW) {
+		for i := range g.p {
+			g.p[i].z -= 10
+		}
+	}
+
+	if ebiten.IsKeyPressed(ebiten.KeyA) {
+		for i := range g.p {
+			g.p[i].x -= 10
+		}
+	}
+
+	if ebiten.IsKeyPressed(ebiten.KeyS) {
+		for i := range g.p {
+			g.p[i].z += 10
+		}
+	}
+
+	if ebiten.IsKeyPressed(ebiten.KeyD) {
+		for i := range g.p {
+			g.p[i].x += 10
+		}
+	}
 	return nil
 }
 
 func (g *game) Draw(screen *ebiten.Image) {
 	for i := 0; i < len(g.planes); i += 4 {
-		a := Sub(g.p[g.planes[i][1]], g.p[g.planes[i][0]])
-		b := Sub(g.p[g.planes[i+1][1]], g.p[g.planes[i+1][0]])
-		center := Divide(Add(g.p[g.planes[i+1][1]], g.p[g.planes[i][0]]), 2)
-		screen.Set(int(center.x)+screenWidth/2, int(center.y)+screenHeight/2, c)
-		cross := Cross(a, b)
-		p := point{float64(screenWidth / 2), float64(screenHeight / 2), 0}
-		if Dot(cross, Add(Divide(center, center.z), p)) < 0 {
-			for i1 := i; i1 < i+4; i1++ {
-				ebitenutil.DrawLine(screen,
-					(g.p[g.planes[i1][0]].x/(g.p[g.planes[i1][0]].z+1500))*-900+float64(screenWidth/2),
-					(g.p[g.planes[i1][0]].y/(g.p[g.planes[i1][0]].z+1500))*-900+float64(screenHeight/2),
-					(g.p[g.planes[i1][1]].x/(g.p[g.planes[i1][1]].z+1500))*-900+float64(screenWidth/2),
-					(g.p[g.planes[i1][1]].y/(g.p[g.planes[i1][1]].z+1500))*-900+float64(screenHeight/2),
-					color.White)
-			}
-		} else {
-			for i1 := i; i1 < i+4; i1++ {
-				ebitenutil.DrawLine(screen,
-					(g.p[g.planes[i1][0]].x/(g.p[g.planes[i1][0]].z+1500))*-900+float64(screenWidth/2),
-					(g.p[g.planes[i1][0]].y/(g.p[g.planes[i1][0]].z+1500))*-900+float64(screenHeight/2),
-					(g.p[g.planes[i1][1]].x/(g.p[g.planes[i1][1]].z+1500))*-900+float64(screenWidth/2),
-					(g.p[g.planes[i1][1]].y/(g.p[g.planes[i1][1]].z+1500))*-900+float64(screenHeight/2),
-					color.RGBA{0xff, 0xff, 0xff, 28})
-
-			}
+		// a := Sub(g.p[g.planes[i][1]], g.p[g.planes[i][0]])
+		// b := Sub(g.p[g.planes[i+1][1]], g.p[g.planes[i+1][0]])
+		// center := Divide(Add(g.p[g.planes[i+1][1]], g.p[g.planes[i][0]]), 2)
+		// screen.Set(int(center.x)+screenWidth/2, int(center.y)+screenHeight/2, c)
+		// cross := Cross(a, b)
+		// p := point{float64(screenWidth / 2), float64(screenHeight / 2), 0}
+		// if Dot(cross, Add(Divide(center, center.z), p)) < 0 {
+		for i1 := i; i1 < i+4; i1++ {
+			ebitenutil.DrawLine(screen,
+				(g.p[g.planes[i1][0]].x/(g.p[g.planes[i1][0]].z+1500))*-900+float64(screenWidth/2),
+				(g.p[g.planes[i1][0]].y/(g.p[g.planes[i1][0]].z+1500))*-900+float64(screenHeight/2),
+				(g.p[g.planes[i1][1]].x/(g.p[g.planes[i1][1]].z+1500))*-900+float64(screenWidth/2),
+				(g.p[g.planes[i1][1]].y/(g.p[g.planes[i1][1]].z+1500))*-900+float64(screenHeight/2),
+				color.White)
 		}
+
+		// } else {
+		// 	for i1 := i; i1 < i+4; i1++ {
+		// 		ebitenutil.DrawLine(screen,
+		// 			(g.p[g.planes[i1][0]].x/(g.p[g.planes[i1][0]].z+1500))*-900+float64(screenWidth/2),
+		// 			(g.p[g.planes[i1][0]].y/(g.p[g.planes[i1][0]].z+1500))*-900+float64(screenHeight/2),
+		// 			(g.p[g.planes[i1][1]].x/(g.p[g.planes[i1][1]].z+1500))*-900+float64(screenWidth/2),
+		// 			(g.p[g.planes[i1][1]].y/(g.p[g.planes[i1][1]].z+1500))*-900+float64(screenHeight/2),
+		// 			color.RGBA{0xff, 0xff, 0xff, 28})
+
+		// 	}
+		// }
 	}
 
 }
