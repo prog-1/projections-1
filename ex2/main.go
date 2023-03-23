@@ -48,24 +48,24 @@ func Mod(a point) float64 {
 	return math.Sqrt(a.x*a.x + a.y*a.y + a.z*a.z)
 }
 
-func (g *game) rotateX() {
+func (g *game) rotateZ() {
 	for i, v := range g.p {
-		g.p[i].x = v.x*math.Cos(0.0025*5) - v.y*math.Sin(0.0025*5)
-		g.p[i].y = v.x*math.Sin(0.0025*5) + v.y*math.Cos(0.0025*5)
+		g.p[i].x = v.x*math.Cos(0.0025) - v.y*math.Sin(0.0025)
+		g.p[i].y = v.x*math.Sin(0.0025) + v.y*math.Cos(0.0025)
 	}
 }
 
 func (g *game) rotateY() {
 	for i, v := range g.p {
-		g.p[i].x = v.x*math.Cos(0.00474533*5) - v.z*math.Sin(0.00474533*5)
-		g.p[i].z = v.x*math.Sin(0.00474533*5) + v.z*math.Cos(0.00474533*5)
+		g.p[i].x = v.x*math.Cos(0.00474533) - (v.z-1500)*math.Sin(0.00474533)
+		g.p[i].z = v.x*math.Sin(0.00474533) + (v.z-1500)*math.Cos(0.00474533) + 1500
 	}
 
 }
-func (g *game) rotateZ() {
+func (g *game) rotateX() {
 	for i, v := range g.p {
-		g.p[i].y = v.y*math.Cos(-0.00474533*5) - v.z*math.Sin(-0.00474533*5)
-		g.p[i].z = v.y*math.Sin(-0.00474533*5) + v.z*math.Cos(-0.00474533*5)
+		g.p[i].y = v.y*math.Cos(-0.00474533) - (v.z-1500)*math.Sin(-0.00474533)
+		g.p[i].z = v.y*math.Sin(-0.00474533) + (v.z-1500)*math.Cos(-0.00474533) + 1500
 	}
 
 }
@@ -84,9 +84,9 @@ func Dot(a, b point) float64 {
 func (g *game) Layout(outWidth, outHeight int) (w, h int) { return screenWidth, screenHeight }
 
 func (g *game) Update() error {
-	// g.rotateX()
-	// g.rotateY()
-	// g.rotateZ()
+	g.rotateX()
+	g.rotateY()
+	g.rotateZ()
 	if ebiten.IsKeyPressed(ebiten.KeyW) {
 		for i := range g.p {
 			g.p[i].z -= 10
@@ -115,29 +115,30 @@ func (g *game) Update() error {
 
 func (g *game) Draw(screen *ebiten.Image) {
 	for i := 0; i < len(g.planes); i += 4 {
-		// a := Sub(g.p[g.planes[i][1]], g.p[g.planes[i][0]])
-		// b := Sub(g.p[g.planes[i+1][1]], g.p[g.planes[i+1][0]])
-		// center := Divide(Add(g.p[g.planes[i+1][1]], g.p[g.planes[i][0]]), 2)
-		// screen.Set(int(center.x)+screenWidth/2, int(center.y)+screenHeight/2, c)
-		// cross := Cross(a, b)
+		a := Sub(g.p[g.planes[i][1]], g.p[g.planes[i][0]])
+		b := Sub(g.p[g.planes[i+1][1]], g.p[g.planes[i+1][0]])
+		center := Divide(Add(g.p[g.planes[i+1][1]], g.p[g.planes[i][0]]), 2)
+		screen.Set(int(center.x)+screenWidth/2, int(center.y)+screenHeight/2, c)
+		cross := Cross(a, b)
 		// p := point{float64(screenWidth / 2), float64(screenHeight / 2), 0}
-		// if Dot(cross, Add(Divide(center, center.z), p)) < 0 {
-		for i1 := i; i1 < i+4; i1++ {
-			ebitenutil.DrawLine(screen,
-				(g.p[g.planes[i1][0]].x/(g.p[g.planes[i1][0]].z+1500))*-900+float64(screenWidth/2),
-				(g.p[g.planes[i1][0]].y/(g.p[g.planes[i1][0]].z+1500))*-900+float64(screenHeight/2),
-				(g.p[g.planes[i1][1]].x/(g.p[g.planes[i1][1]].z+1500))*-900+float64(screenWidth/2),
-				(g.p[g.planes[i1][1]].y/(g.p[g.planes[i1][1]].z+1500))*-900+float64(screenHeight/2),
-				color.White)
-		}
+		if Dot(cross, g.p[g.planes[i][0]]) < 0 {
+			for i1 := i; i1 < i+4; i1++ {
+				ebitenutil.DrawLine(screen,
+					(g.p[g.planes[i1][0]].x/(g.p[g.planes[i1][0]].z))*-900+float64(screenWidth/2),
+					(g.p[g.planes[i1][0]].y/(g.p[g.planes[i1][0]].z))*-900+float64(screenHeight/2),
+					(g.p[g.planes[i1][1]].x/(g.p[g.planes[i1][1]].z))*-900+float64(screenWidth/2),
+					(g.p[g.planes[i1][1]].y/(g.p[g.planes[i1][1]].z))*-900+float64(screenHeight/2),
+					color.White)
+			}
 
-		// } else {
+		}
+		//  else {
 		// 	for i1 := i; i1 < i+4; i1++ {
 		// 		ebitenutil.DrawLine(screen,
-		// 			(g.p[g.planes[i1][0]].x/(g.p[g.planes[i1][0]].z+1500))*-900+float64(screenWidth/2),
-		// 			(g.p[g.planes[i1][0]].y/(g.p[g.planes[i1][0]].z+1500))*-900+float64(screenHeight/2),
-		// 			(g.p[g.planes[i1][1]].x/(g.p[g.planes[i1][1]].z+1500))*-900+float64(screenWidth/2),
-		// 			(g.p[g.planes[i1][1]].y/(g.p[g.planes[i1][1]].z+1500))*-900+float64(screenHeight/2),
+		// 			(g.p[g.planes[i1][0]].x/(g.p[g.planes[i1][0]].z))*-900+float64(screenWidth/2),
+		// 			(g.p[g.planes[i1][0]].y/(g.p[g.planes[i1][0]].z))*-900+float64(screenHeight/2),
+		// 			(g.p[g.planes[i1][1]].x/(g.p[g.planes[i1][1]].z))*-900+float64(screenWidth/2),
+		// 			(g.p[g.planes[i1][1]].y/(g.p[g.planes[i1][1]].z))*-900+float64(screenHeight/2),
 		// 			color.RGBA{0xff, 0xff, 0xff, 28})
 
 		// 	}
@@ -159,15 +160,15 @@ func NewGame() *game {
 
 	return &game{
 		p: [8]point{
-			{300, -300, -300},  //0
-			{-300, -300, -300}, //1
-			{-300, 300, -300},  //2
-			{300, 300, -300},   //3
+			{300, -300, 1200},  //0
+			{-300, -300, 1200}, //1
+			{-300, 300, 1200},  //2
+			{300, 300, 1200},   //3
 
-			{300, -300, 300},  //4
-			{-300, -300, 300}, //5
-			{-300, 300, 300},  //6
-			{300, 300, 300},   //7
+			{300, -300, 1800},  //4
+			{-300, -300, 1800}, //5
+			{-300, 300, 1800},  //6
+			{300, 300, 1800},   //7
 		},
 		planes: [][2]int{
 			// near plane
